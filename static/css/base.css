@@ -1,0 +1,304 @@
+/* ===== BASE STYLES ===== */
+/* Common styles used across all pages */
+
+/* ===== SCROLLBAR HIDE ===== */
+.scrollbar-hide::-webkit-scrollbar {
+    display: none;
+}
+
+.scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+}
+
+/* ===== SEARCH BOX ===== */
+#searchInput:focus + #searchBtn .search-icon,
+#searchInput:focus ~ .search-icon {
+    color: #2563eb;
+}
+
+#searchBtn:active {
+    transform: scale(0.95);
+}
+
+/* ===== HEADER LAYOUT ===== */
+header .max-w-7xl {
+    max-width: 80rem;
+}
+
+@media (min-width: 1024px) {
+    header .flex-1 {
+        flex: 1 1 400px;
+    }
+}
+
+/* ===== HOVER EFFECTS ===== */
+.hover-lift {
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.hover-lift:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+}
+
+/* ===== DROPDOWN ===== */
+.dropdown-menu {
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(-10px);
+    transition: all 0.3s ease;
+}
+
+.dropdown-menu.show {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+}
+
+/* ===== BANNER SLIDER ===== */
+.banner-slide {
+    transition: opacity 0.5s ease-in-out;
+}
+
+.auto-slider-container {
+    overflow: hidden;
+    position: relative;
+}
+
+.auto-slider-track {
+    display: flex;
+    transition: transform 0.6s ease-in-out;
+}
+
+.auto-slider-item {
+    flex-shrink: 0;
+    width: 50%;
+}
+
+/* ===== BRAND SCROLL SECTION ===== */
+.brand-scroll-container {
+    position: relative;
+    width: 100%;
+}
+
+.brand-scroll-track {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    width: max-content;
+}
+
+.brand-row {
+    display: flex;
+    justify-content: space-between;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.brand-card {
+    flex: 1;
+    min-width: 90px;
+    max-width: 120px;
+}
+
+.brand-card-inner {
+    background: white;
+    border-radius: 8px;
+    padding: 0;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    border: 1px solid #e5e7eb;
+    transition: all 0.2s ease;
+    text-align: center;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    gap: 0;
+    height: 48px;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.brand-card-inner:hover {
+    border-color: #2563eb;
+    box-shadow: 0 2px 8px rgba(37, 99, 235, 0.15);
+    background: #f8fafc;
+}
+
+.brand-logo {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: transparent;
+    border-radius: 0;
+    margin: 0;
+    flex-shrink: 0;
+    overflow: hidden;
+    padding: 8px;
+    box-sizing: border-box;
+}
+
+.brand-logo img {
+    max-width: 100%;
+    max-height: 100%;
+    width: auto;
+    height: auto;
+    object-fit: contain;
+}
+
+.brand-name {
+    display: none;
+}
+
+/* ===== SCROLL BUTTONS ===== */
+.brand-scroll-btn {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    z-index: 10;
+    width: 2.25rem;
+    height: 2.25rem;
+    background: white;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    color: #2563eb;
+    transition: all 0.3s ease;
+    opacity: 0;
+    pointer-events: none;
+}
+
+.brand-scroll-btn:hover {
+    background: #f3f4f6;
+    transform: translateY(-50%) scale(1.1);
+}
+
+.brand-scroll-btn.left {
+    left: 0;
+}
+
+.brand-scroll-btn.right {
+    right: 0;
+}
+
+.brand-scroll-container:hover .brand-scroll-btn {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+.brand-scroll-container:hover .brand-scroll-btn.disabled {
+    opacity: 0;
+    pointer-events: none;
+}
+
+/* ===== SCROLL CONTENT ===== */
+.brand-scroll-content {
+    overflow-x: auto;
+    scroll-behavior: smooth;
+}
+
+.brand-scroll-content::-webkit-scrollbar {
+    display: none;
+}
+
+.brand-scroll-content {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+}
+
+/* ===== ROTATE ICON ===== */
+.rotate-180 {
+    transform: rotate(180deg);
+    transition: transform 0.3s ease;
+}
+
+/* ===== PAGINATION STYLES ===== */
+.pagination-btn {
+    min-width: 2.25rem;
+    height: 2.25rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 0.5rem;
+    background: white;
+    border: 1px solid #e5e7eb;
+    color: #374151;
+    font-size: 0.875rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.pagination-btn:hover:not(.disabled):not(.active) {
+    background: #f3f4f6;
+    border-color: #d1d5db;
+}
+
+.pagination-btn.active {
+    background: #2563eb;
+    border-color: #2563eb;
+    color: white;
+}
+
+.pagination-btn.disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.pagination-ellipsis {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0 0.25rem;
+    color: #6b7280;
+}
+
+/* ===== FILTER FORM ===== */
+.filter-form input:focus,
+.filter-form select:focus {
+    outline: none;
+    border-color: #2563eb;
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+}
+
+/* ===== FOOTER STYLES ===== */
+footer a {
+    transition: color 0.2s ease;
+}
+
+/* ===== RESPONSIVE BASE ===== */
+@media (max-width: 640px) {
+    .brand-row {
+        gap: 6px;
+    }
+
+    .brand-card {
+        flex: 1;
+        min-width: 60px;
+        max-width: none;
+    }
+
+    .brand-card-inner {
+        height: 40px;
+        border-radius: 6px;
+    }
+
+    .brand-logo {
+        padding: 4px;
+    }
+
+    .brand-name {
+        display: none;
+    }
+
+    .brand-scroll-btn {
+        width: 1.75rem;
+        height: 1.75rem;
+    }
+}
+
