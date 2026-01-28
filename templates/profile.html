@@ -1,0 +1,698 @@
+{% extends 'base.html' %}
+
+{% load static %}
+{% load format_filters %}
+
+{% block title %}Thông tin tài khoản - QHUN22{% endblock %}
+
+{% block extra_css %}
+<style>
+    .address-card {
+        transition: all 0.2s ease;
+    }
+    .address-card:hover {
+        border-color: #2563eb;
+    }
+    .address-card.active {
+        border-color: #2563eb;
+        background: #f8fafc;
+    }
+    .address-card.active .default-badge {
+        background: #2563eb;
+        color: white;
+    }
+    .modal-overlay {
+        background: rgba(0, 0, 0, 0.5);
+        backdrop-filter: blur(4px);
+    }
+    .modal-content {
+        animation: modalSlideIn 0.3s ease;
+    }
+    @keyframes modalSlideIn {
+        from {
+            opacity: 0;
+            transform: translateY(-20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+   
+    <section class="max-w-7xl mx-auto px-4 py-8">
+        <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
+           
+            <div class="lg:col-span-1">
+                <div class="bg-white rounded-xl shadow-md overflow-hidden sticky top-24">
+                   
+                    <div class="bg-primary p-6 text-white text-center">
+                        <div class="w-20 h-20 bg-white/20 rounded-full flex items-center justify-center mx-auto mb-3">
+                            {% if user.first_name or user.last_name %}
+                            <span class="text-3xl font-bold">{{ user.first_name|slice:":1" }}{{ user.last_name|slice:":1" }}</span>
+                            {% else %}
+                            <i class="fas fa-user text-3xl"></i>
+                            {% endif %}
+                        </div>
+                        <h3 class="font-semibold text-lg">{{ user.first_name|default:user.username }}</h3>
+                        <p class="text-sm opacity-80">{{ user.email }}</p>
+                    </div>
+
+                    <nav class="p-4">
+                        <ul class="space-y-2" id="sidebar-menu">
+                            {% if user.is_staff or user.is_superuser %}
+                            <li>
+                                <a href="{% url 'admin_dashboard' %}" class="menu-item flex items-center gap-3 px-4 py-3 text-purple-700 bg-purple-50 hover:bg-purple-100 rounded-lg transition-colors">
+                                    <i class="fas fa-cog w-5"></i>
+                                    <span class="font-medium">Trang quản trị</span>
+                                </a>
+                            </li>
+                            {% endif %}
+                            <li>
+                                <a href="{% url 'home' %}" class="menu-item flex items-center gap-3 px-4 py-3 text-gray-700 hover:bg-gray-100 rounded-lg transition-colors">
+                                    <i class="fas fa-home w-5"></i>
+                                    <span>Trang chủ</span>
+                                </a>
+                            </li>
+
+                            <li>
+                                <a href="#profile-info" class="menu-item flex items-center gap-3 px-4 py-3 text-gray-700 hover:bg-gray-100 rounded-lg transition-colors">
+                                    <i class="fas fa-user-cog w-5"></i>
+                                    <span>Thông tin tài khoản</span>
+                                </a>
+                            </li>
+                            <li>
+                                <a href="#saved-addresses" class="menu-item flex items-center gap-3 px-4 py-3 text-gray-700 hover:bg-gray-100 rounded-lg transition-colors">
+                                    <i class="fas fa-map-marker-alt w-5"></i>
+                                    <span>Sổ địa chỉ</span>
+                                </a>
+                            </li>
+                            <li>
+                                <a href="#purchase-history" class="menu-item flex items-center gap-3 px-4 py-3 text-gray-700 hover:bg-gray-100 rounded-lg transition-colors">
+                                    <i class="fas fa-history w-5"></i>
+                                    <span>Lịch sử mua hàng</span>
+                                </a>
+                            </li>
+                            <li>
+                                <a href="#coupons" class="menu-item flex items-center gap-3 px-4 py-3 text-gray-700 hover:bg-gray-100 rounded-lg transition-colors">
+                                    <i class="fas fa-tag w-5"></i>
+                                    <span>Mã giảm giá</span>
+                                </a>
+                            </li>
+                            <li>
+                                <a href="#feedback" class="menu-item flex items-center gap-3 px-4 py-3 text-gray-700 hover:bg-gray-100 rounded-lg transition-colors">
+                                    <i class="fas fa-comment-dots w-5"></i>
+                                    <span>Góp ý</span>
+                                </a>
+                            </li>
+                            <li>
+                                <hr class="my-2 border-gray-200">
+                            </li>
+                            <li>
+                                <a href="{% url 'logout' %}" class="menu-item flex items-center gap-3 px-4 py-3 text-red-600 hover:bg-red-50 rounded-lg transition-colors">
+                                    <i class="fas fa-sign-out-alt w-5"></i>
+                                    <span>Đăng xuất</span>
+                                </a>
+                            </li>
+                        </ul>
+                    </nav>
+                </div>
+            </div>
+
+         
+            <div class="lg:col-span-3 space-y-6">
+                
+                <div id="profile-info" class="bg-white rounded-xl shadow-md p-6 scroll-mt-24">
+                    <div class="flex items-center justify-between mb-6">
+                        <h2 class="text-xl font-bold text-dark">Thông tin tài khoản</h2>
+                        <span class="px-3 py-1 bg-green-100 text-green-700 text-sm rounded-full">
+                            <i class="fas fa-check-circle mr-1"></i>Đã xác thực
+                        </span>
+                    </div>
+
+                    <form method="POST">
+                        {% csrf_token %}
+
+                     
+                        {% if messages %}
+                        {% for message in messages %}
+                        <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded-lg mb-4 text-sm">
+                            <i class="fas fa-check-circle mr-2"></i>{{ message }}
+                        </div>
+                        {% endfor %}
+                        {% endif %}
+
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                          
+                            <div class="mb-4">
+                                <label for="{{ form.first_name.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-1">Họ và tên</label>
+                                {{ form.first_name }}
+                                {% if form.first_name.errors %}
+                                <p class="text-red-500 text-xs mt-1">{{ form.first_name.errors.0 }}</p>
+                                {% endif %}
+                            </div>
+
+                          
+                            <div class="mb-4">
+                                <label for="{{ form.email.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-1">Email</label>
+                                {{ form.email }}
+                                {% if form.email.errors %}
+                                <p class="text-red-500 text-xs mt-1">{{ form.email.errors.0 }}</p>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        
+                        <div class="flex justify-end mt-4">
+                            <button type="submit"
+                                class="px-6 py-3 bg-primary hover:bg-secondary text-white font-semibold rounded-lg transition-colors duration-200 cursor-pointer">
+                                <i class="fas fa-save mr-2"></i>Lưu thay đổi
+                            </button>
+                        </div>
+                    </form>
+                </div>
+
+                
+                <div id="saved-addresses" class="bg-white rounded-xl shadow-md p-6 scroll-mt-24">
+                    <div class="flex items-center justify-between mb-4">
+                        <h3 class="text-lg font-bold text-dark">
+                            <i class="fas fa-map-marker-alt text-primary mr-2"></i>Sổ địa chỉ
+                        </h3>
+                        <button onclick="openAddressModal()"
+                            class="px-4 py-2 bg-primary hover:bg-secondary text-white text-sm font-medium rounded-lg transition-colors cursor-pointer">
+                            <i class="fas fa-plus mr-1"></i>Thêm địa chỉ
+                        </button>
+                    </div>
+
+                   
+                    <div id="address-list" class="space-y-4">
+                        {% if user.addresses.exists %}
+                            {% for address in user.addresses.all %}
+                            <div class="address-card p-4 border border-gray-200 rounded-lg {% if address.is_default %}active{% endif %}" data-address-id="{{ address.id }}">
+                                <div class="flex items-start justify-between">
+                                    <div class="flex-1">
+                                        <div class="flex items-center gap-2 mb-2">
+                                            <span class="font-semibold text-gray-800">{{ address.full_name }}</span>
+                                            {% if address.is_default %}
+                                            <span class="default-badge px-2 py-0.5 bg-purple-100 text-purple-700 text-xs font-medium rounded">Mặc định</span>
+                                            {% endif %}
+                                        </div>
+                                        <p class="text-gray-600 text-sm">{{ address.phone }}</p>
+                                        <p class="text-gray-600 text-sm mt-1">{{ address.address_detail }}, {{ address.ward }}, {{ address.district }}, {{ address.province }}</p>
+                                    </div>
+                                    <div class="flex items-center gap-2">
+                                        <button onclick="deleteAddress({{ address.id }})" class="text-red-500 hover:text-red-700 p-2 rounded-lg hover:bg-red-50 transition-colors" title="Xoa">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                                
+                                <div class="mt-3 pt-3 border-t border-gray-100">
+                                    <label class="flex items-center gap-2 cursor-pointer">
+                                        <input type="radio" name="default_address" value="{{ address.id }}"
+                                            {% if address.is_default %}checked{% endif %}
+                                            onchange="setDefaultAddress({{ address.id }})"
+                                            class="w-4 h-4 text-primary border-gray-300 focus:ring-primary">
+                                        <span class="text-sm text-gray-600">Chọn làm địa chỉ mặc định</span>
+                                    </label>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        {% else %}
+                      
+                        <div class="text-center py-8">
+                            <i class="fas fa-map-marker-alt text-4xl text-gray-300 mb-3"></i>
+                            <p class="text-gray-500">Chưa có địa chỉ nào</p>
+                            <p class="text-gray-400 text-sm mt-1">Nhấn "Thêm địa chỉ" để thêm mới</p>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+
+             
+                <div id="purchase-history" class="bg-white rounded-xl shadow-md p-6 scroll-mt-24">
+                    <h3 class="text-lg font-bold text-dark mb-4">
+                        <i class="fas fa-history text-primary mr-2"></i>Lịch sử mua hàng
+                    </h3>
+
+                    {% if orders %}
+                    <div class="space-y-4">
+                        {% for order in orders %}
+                        <div class="border border-gray-200 rounded-lg p-4 hover:border-primary transition-colors">
+                            <div class="flex items-center justify-between mb-3">
+                                <div>
+                                    <span class="font-semibold text-dark">Đơn hàng #{{ order.id }}</span>
+                                    <span class="text-gray-500 text-sm ml-2">{{ order.created_at|date:"d/m/Y H:i" }}</span>
+                                </div>
+                                <span class="px-3 py-1 rounded-full text-sm font-medium {{ order.get_status_color }}">
+                                    {{ order.get_status_display }}
+                                </span>
+                            </div>
+                            <div class="flex items-center justify-between">
+                                <div class="text-sm text-gray-600">
+                                    <span>{{ order.items.count }} sản phẩm</span>
+                                    <span class="mx-2">•</span>
+                                    <span class="font-semibold text-primary">{{ order.total_amount|floatformat:0 }}₫</span>
+                                </div>
+                                <a href="#" class="text-primary hover:underline text-sm">
+                                    Xem chi tiết <i class="fas fa-chevron-right ml-1"></i>
+                                </a>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% else %}
+                   
+                    <div class="text-center py-8">
+                        <i class="fas fa-shopping-bag text-4xl text-gray-300 mb-3"></i>
+                        <p class="text-gray-500">Chưa có đơn hàng nào</p>
+                        <a href="{% url 'home' %}" class="inline-block mt-4 px-6 py-2 bg-primary hover:bg-secondary text-white rounded-lg transition-colors">
+                            Mua sắm ngay
+                        </a>
+                    </div>
+                    {% endif %}
+                </div>
+
+                <div id="coupons" class="bg-white rounded-xl shadow-md p-6 scroll-mt-24">
+                    <h3 class="text-lg font-bold text-dark mb-4">
+                        <i class="fas fa-tag text-primary mr-2"></i>Mã giảm giá
+                    </h3>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        {% if coupons %}
+                            {% for coupon in coupons %}
+                            <div class="coupon-card relative bg-gradient-to-r from-primary to-secondary rounded-xl p-4 text-white overflow-hidden">
+                                <!-- Background decoration -->
+                                <div class="absolute -right-4 -top-4 w-24 h-24 bg-white/10 rounded-full"></div>
+                                <div class="absolute -left-4 -bottom-4 w-16 h-16 bg-white/10 rounded-full"></div>
+                                
+                                <div class="relative">
+                                    <div class="flex items-start justify-between mb-3">
+                                        <div>
+                                            <span class="coupon-code bg-white/20 px-3 py-1 rounded text-sm font-mono font-bold">
+                                                {{ coupon.code }}
+                                            </span>
+                                        </div>
+                                        <span class="coupon-discount text-2xl font-bold">
+                                            {% if coupon.discount_type == 'percent' %}
+                                                {{ coupon.discount_value }}%
+                                            {% else %}
+                                                {{ coupon.discount_value|format_number }}₫
+                                            {% endif %}
+                                        </span>
+                                    </div>
+                                    
+                                    <h4 class="font-semibold mb-1">{{ coupon.name }}</h4>
+                                    <p class="text-white/80 text-sm mb-3">{{ coupon.description }}</p>
+                                    
+                                    <div class="flex items-center justify-between text-xs text-white/70">
+                                        <span>
+                                            <i class="fas fa-calendar-alt mr-1"></i>
+                                            HSD: {{ coupon.end_date|date:"d/m/Y" }}
+                                        </span>
+                                        <button onclick="copyCouponCode('{{ coupon.code }}')"
+                                            class="bg-white text-primary px-3 py-1 rounded font-medium hover:bg-white/90 transition-colors cursor-pointer">
+                                            <i class="fas fa-copy mr-1"></i>Sao chép
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        {% else %}
+                        <!-- Empty state -->
+                        <div class="col-span-full text-center py-8">
+                            <i class="fas fa-ticket-alt text-4xl text-gray-300 mb-3"></i>
+                            <p class="text-gray-500">Chưa có mã giảm giá nào</p>
+                            <p class="text-gray-400 text-sm mt-1">Hay quay lại sau để nhận mã khuyến mãi!</p>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- Feedback -->
+                <div id="feedback" class="bg-white rounded-xl shadow-md p-6 scroll-mt-24">
+                    <h3 class="text-lg font-bold text-dark mb-4">
+                        <i class="fas fa-comment-dots text-primary mr-2"></i>Góp ý
+                    </h3>
+
+                    <form method="POST" action="{% url 'feedback' %}" id="feedbackForm">
+                        {% csrf_token %}
+
+                        <div class="space-y-4">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Tiêu đề</label>
+                                <input type="text" name="subject" placeholder="Nhập tiêu đề góp ý" required
+                                    class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent">
+                            </div>
+
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Nội dung</label>
+                                <textarea name="message" rows="5" placeholder="Nhập nội dung góp ý" required
+                                    class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent resize-none"></textarea>
+                            </div>
+
+                            <div class="flex justify-end">
+                                <button type="submit"
+                                    class="px-6 py-3 bg-primary hover:bg-secondary text-white font-semibold rounded-lg transition-colors duration-200 cursor-pointer">
+                                    <i class="fas fa-paper-plane mr-2"></i>Gửi góp ý
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Address Modal -->
+    <div id="address-modal" class="fixed inset-0 z-50 hidden">
+        <div class="modal-overlay absolute inset-0" onclick="closeAddressModal()"></div>
+        <div class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-full max-w-md px-4">
+            <div class="modal-content bg-white rounded-xl shadow-2xl p-6">
+                <div class="flex items-center justify-between mb-4">
+                    <h3 class="text-lg font-bold text-dark">Thêm địa chỉ mới</h3>
+                    <button onclick="closeAddressModal()" class="text-gray-400 hover:text-gray-600 p-1">
+                        <i class="fas fa-times text-xl"></i>
+                    </button>
+                </div>
+
+                <form method="POST" action="{% url 'add_address' %}" id="addressForm" onsubmit="return validateAddressForm(event)">
+                    {% csrf_token %}
+
+                    <div class="space-y-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Họ và tên <span class="text-red-500">*</span></label>
+                            <input type="text" name="full_name" id="addr_full_name" required
+                                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+                                placeholder="Nhập họ và tên">
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Số điện thoại <span class="text-red-500">*</span></label>
+                            <input type="text" name="phone" id="addr_phone" required
+                                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+                                placeholder="Nhập số điện thoại">
+                        </div>
+
+                        <div class="grid grid-cols-3 gap-4">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Tỉnh/Thành <span class="text-red-500">*</span></label>
+                                <input type="text" name="province" id="addr_province" required
+                                    class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+                                    placeholder="Tỉnh/Thành phố">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Quận/Huyện <span class="text-red-500">*</span></label>
+                                <input type="text" name="district" id="addr_district" required
+                                    class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+                                    placeholder="Quận/Huyện">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Phường/Xã <span class="text-red-500">*</span></label>
+                                <input type="text" name="ward" id="addr_ward" required
+                                    class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+                                    placeholder="Phường/Xã">
+                            </div>
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Địa chỉ chi tiết <span class="text-red-500">*</span></label>
+                            <input type="text" name="address_detail" id="addr_address_detail" required
+                                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+                                placeholder="Số nhà, tên đường...">
+                        </div>
+
+                        <div class="flex justify-end gap-3 mt-6">
+                            <button type="button" onclick="closeAddressModal()"
+                                class="px-6 py-3 border border-gray-300 text-gray-700 font-medium rounded-lg hover:bg-gray-50 transition-colors cursor-pointer">
+                                Hủy
+                            </button>
+                            <button type="submit"
+                                class="px-6 py-3 bg-primary hover:bg-secondary text-white font-medium rounded-lg transition-colors cursor-pointer">
+                                <i class="fas fa-save mr-2"></i>Lưu
+                            </button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Address modal functions
+    function openAddressModal() {
+        document.getElementById('address-modal').classList.remove('hidden');
+        document.body.style.overflow = 'hidden';
+    }
+
+    function closeAddressModal() {
+        document.getElementById('address-modal').classList.add('hidden');
+        document.body.style.overflow = '';
+        // Reset form
+        document.getElementById('addressForm').reset();
+    }
+
+    // Validate address form
+    function validateAddressForm(event) {
+        const fullName = document.getElementById('addr_full_name').value.trim();
+        const phone = document.getElementById('addr_phone').value.trim();
+        const province = document.getElementById('addr_province').value.trim();
+        const district = document.getElementById('addr_district').value.trim();
+        const ward = document.getElementById('addr_ward').value.trim();
+        const addressDetail = document.getElementById('addr_address_detail').value.trim();
+
+        if (!fullName || !phone || !province || !district || !ward || !addressDetail) {
+            showToast('error', 'Lỗi', 'Vui lòng điền đầy đủ thông tin địa chỉ');
+            return false;
+        }
+
+        // Validate phone number
+        const phoneRegex = /^[\d\s\-\+\(\)]{10,15}$/;
+        if (!phoneRegex.test(phone)) {
+            showToast('error', 'Lỗi', 'Số điện thoại không hợp lệ');
+            return false;
+        }
+
+        return true;
+    }
+
+    // Set default address
+    function setDefaultAddress(addressId) {
+        if (addressId) {
+            fetch(`/profile/set-default-address/${addressId}/`, {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': getCookie('csrftoken'),
+                    'Content-Type': 'application/json',
+                },
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    showToast('success', 'Thành công', 'Địa chỉ mặc định đã được cập nhật!');
+                    // Reload page to show updated UI
+                    setTimeout(() => {
+                        window.location.reload();
+                    }, 1000);
+                } else {
+                    showToast('error', 'Lỗi', 'Không thể cập nhật địa chỉ mặc định');
+                }
+            })
+            .catch(error => {
+                showToast('error', 'Lỗi', 'Đã xảy ra lỗi. Vui lòng thử lại.');
+            });
+        }
+    }
+
+    // Delete address
+    function deleteAddress(addressId) {
+        if (addressId && confirm('Bạn có muốn xóa địa chỉ này?')) {
+            fetch(`/profile/delete-address/${addressId}/`, {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': getCookie('csrftoken'),
+                    'Content-Type': 'application/json',
+                },
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    showToast('success', 'Thành công', 'Địa chỉ đã được xóa!');
+                    // Reload page to show updated UI
+                    setTimeout(() => {
+                        window.location.reload();
+                    }, 1000);
+                } else {
+                    showToast('error', 'Lỗi', 'Không thể xóa địa chỉ');
+                }
+            })
+            .catch(error => {
+                showToast('error', 'Lỗi', 'Đã xảy ra lỗi. Vui lòng thử lại.');
+            });
+        }
+    }
+
+    // Get CSRF token
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+
+    // Close modal on Escape key
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') {
+            closeAddressModal();
+        }
+    });
+
+    // ==================== SIDEBAR NAVIGATION ====================
+    (function() {
+        // Configuration
+        const OFFSET = 120; // Offset from top for activation
+
+        // Get all menu items (except logout)
+        const menuItems = document.querySelectorAll('#sidebar-menu .menu-item[href^="#"]');
+        // Get all sections
+        const sections = Array.from(menuItems).map(item => {
+            const id = item.getAttribute('href').substring(1);
+            return document.getElementById(id);
+        }).filter(Boolean);
+
+        // Active class template
+        const activeClasses = [
+            'bg-primary/10',
+            'text-primary',
+            'font-medium'
+        ].join(' ');
+
+        // Default classes
+        const defaultClasses = [
+            'text-gray-700'
+        ].join(' ');
+
+        // Set active menu item
+        function setActiveMenuItem(item) {
+            // Remove active from all items
+            menuItems.forEach(el => {
+                el.classList.remove(...activeClasses.split(' '));
+                el.classList.add(...defaultClasses.split(' '));
+                el.querySelector('i').classList.remove('text-primary');
+            });
+            // Add active to current item
+            item.classList.add(...activeClasses.split(' '));
+            item.classList.remove(...defaultClasses.split(' '));
+            item.querySelector('i').classList.add('text-primary');
+        }
+
+        // Click handler
+        menuItems.forEach(item => {
+            item.addEventListener('click', function(e) {
+                e.preventDefault();
+                const targetId = this.getAttribute('href').substring(1);
+                const targetSection = document.getElementById(targetId);
+                
+                if (targetSection) {
+                    // Set active immediately on click
+                    setActiveMenuItem(this);
+
+                    // Scroll to section
+                    const headerHeight = document.querySelector('header')?.offsetHeight || 0;
+                    const targetPosition = targetSection.offsetTop - headerHeight - OFFSET;
+                    
+                    window.scrollTo({
+                        top: targetPosition,
+                        behavior: 'smooth'
+                    });
+
+                    // Update URL without jumping
+                    history.pushState(null, null, this.getAttribute('href'));
+                }
+            });
+        });
+
+        // Scrollspy - detect visible section
+        function handleScrollSpy() {
+            const scrollPosition = window.scrollY + window.innerHeight / 2;
+
+            for (let i = sections.length - 1; i >= 0; i--) {
+                const section = sections[i];
+                if (section.offsetTop <= scrollPosition) {
+                    const correspondingItem = document.querySelector(`#sidebar-menu .menu-item[href="#${section.id}"]`);
+                    if (correspondingItem) {
+                        setActiveMenuItem(correspondingItem);
+                    }
+                    break;
+                }
+            }
+        }
+
+        // Initialize on page load
+        function init() {
+            // Check if there's a hash in URL
+            const hash = window.location.hash;
+            if (hash) {
+                const targetSection = document.getElementById(hash.substring(1));
+                if (targetSection) {
+                    // Delay scroll to ensure page is loaded
+                    setTimeout(() => {
+                        const headerHeight = document.querySelector('header')?.offsetHeight || 0;
+                        window.scrollTo({
+                            top: targetSection.offsetTop - headerHeight - OFFSET,
+                            behavior: 'smooth'
+                        });
+                    }, 100);
+                }
+            }
+
+            // Set initial active item based on scroll position
+            handleScrollSpy();
+        }
+
+        // Throttle function for scroll event
+        function throttle(func, limit) {
+            let inThrottle;
+            return function() {
+                if (!inThrottle) {
+                    func.apply(this, arguments);
+                    inThrottle = true;
+                    setTimeout(() => inThrottle = false, limit);
+                }
+            };
+        }
+
+        // Add scroll listener with throttling
+        window.addEventListener('scroll', throttle(handleScrollSpy, 100));
+
+        // Initialize when DOM is ready
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', init);
+        } else {
+            init();
+        }
+    })();
+
+    // Copy coupon code function
+    function copyCouponCode(code) {
+        navigator.clipboard.writeText(code).then(function() {
+            showToast('success', 'Thành công', 'Đã sao chép mã giảm giá!');
+        }, function(err) {
+            showToast('error', 'Lỗi', 'Không thể sao chép mã giảm giá!');
+        });
+    }
+</script>
+{% endblock %}

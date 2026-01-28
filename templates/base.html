@@ -1,0 +1,97 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}QHUN22{% endblock %}</title>
+
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Font Awesome CDN -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <!-- Custom configuration for Tailwind -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#2563eb',
+                        secondary: '#1e40af',
+                        accent: '#f59e0b',
+                        light: '#f3f4f6',
+                        dark: '#1f2937'
+                    }
+                }
+            }
+        }
+    </script>
+
+    <!-- CSS Files -->
+    <link rel="stylesheet" href="{% static 'css/base.css' %}">
+    <link rel="stylesheet" href="{% static 'css/toast.css' %}">
+    <link rel="stylesheet" href="{% static 'css/home.css' %}">
+
+    {% block extra_css %}{% endblock %}
+</head>
+
+<body class="bg-gray-50 font-sans">
+
+    <!-- Toast Container -->
+    <div id="toast-container"></div>
+
+    <!-- Header -->
+    {% include 'header.html' %}
+
+    <!-- Main Content -->
+    <main>
+        {% block content %}{% endblock %}
+    </main>
+
+    <!-- Footer -->
+    {% include 'footer.html' %}
+
+    <!-- JS Files -->
+    <script src="{% static 'js/toast.js' %}"></script>
+    <script src="{% static 'js/auth.js' %}"></script>
+    <script src="{% static 'js/main.js' %}"></script>
+
+    <!-- Django Messages to Toast Integration -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            {% if messages %}
+                {% for message in messages %}
+                    (function() {
+                        var messageText = '{{ message }}';
+                        var messageTags = '{{ message.tags }}';
+                        var type = 'info';
+                        var title = 'Thông báo';
+
+                        if (messageTags === 'success') {
+                            type = 'success';
+                            title = 'Thành công';
+                        } else if (messageTags === 'error') {
+                            type = 'error';
+                            title = 'Lỗi';
+                        } else if (messageTags === 'warning') {
+                            type = 'warning';
+                            title = 'Cảnh báo';
+                        }
+
+                        if (typeof showToast === 'function') {
+                            showToast(type, title, messageText);
+                        }
+                    })();
+                {% endfor %}
+            {% endif %}
+        });
+    </script>
+
+    {% block extra_js %}{% endblock %}
+
+</body>
+
+</html>

@@ -1,0 +1,494 @@
+{% extends 'qhun22.html' %}
+{% load static %}
+{% load format_filters %}
+
+{% block title %}Quản lý khuyến mãi - QHUN22{% endblock %}
+
+{% block content %}
+<!-- ==================== PROMOTIONS MANAGEMENT ==================== -->
+<div style="display: flex; min-height: calc(100vh - 64px); background: #f3f4f6;">
+    <!-- Sidebar -->
+    <aside class="admin-sidebar flex-shrink-0">
+        <div style="padding: 24px;">
+            <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 24px;">
+                <div style="width: 40px; height: 40px; background: #2563eb; border-radius: 8px; display: flex; align-items: center; justify-content: center;">
+                    <i class="fas fa-cog" style="color: white;"></i>
+                </div>
+                <div>
+                    <h2 style="color: white; font-weight: bold;">QHUN22</h2>
+                </div>
+            </div>
+            
+            <!-- Menu -->
+            <nav style="display: flex; flex-direction: column; gap: 4px;">
+                <a href="{% url 'admin_dashboard' %}" class="admin-menu-item" id="menu-dashboard">
+                    <i class="fas fa-tachometer-alt" style="width: 20px;"></i>
+                    <span>Bảng điều khiển</span>
+                </a>
+                <a href="{% url 'admin_promotions' %}" class="admin-menu-item active" id="menu-promotions">
+                    <i class="fas fa-gift" style="width: 20px;"></i>
+                    <span>Khuyến mãi đặc biệt</span>
+                </a>
+                <a href="#" class="admin-menu-item" id="menu-orders">
+                    <i class="fas fa-shopping-cart" style="width: 20px;"></i>
+                    <span>Quản lý đơn hàng</span>
+                </a>
+                <a href="{% url 'admin_products' %}" class="admin-menu-item" id="menu-products">
+                    <i class="fas fa-mobile-alt" style="width: 20px;"></i>
+                    <span>Quản lý sản phẩm</span>
+                </a>
+                <a href="{% url 'admin_coupons' %}" class="admin-menu-item" id="menu-coupons">
+                    <i class="fas fa-ticket-alt" style="width: 20px;"></i>
+                    <span>Mã khuyến mãi</span>
+                </a>
+                <a href="#" class="admin-menu-item" id="menu-categories">
+                    <i class="fas fa-list" style="width: 20px;"></i>
+                    <span>Quản lý danh mục</span>
+                </a>
+                <a href="#" class="admin-menu-item" id="menu-users">
+                    <i class="fas fa-users" style="width: 20px;"></i>
+                    <span>Quản lý thành viên</span>
+                </a>
+                <a href="#" class="admin-menu-item" id="menu-reports">
+                    <i class="fas fa-chart-bar" style="width: 20px;"></i>
+                    <span>Báo cáo thống kê</span>
+                </a>
+                <hr style="border-color: #374151; margin: 16px 0;">
+                <a href="{% url 'home' %}" class="admin-menu-item">
+                    <i class="fas fa-arrow-left" style="width: 20px;"></i>
+                    <span>Quay lại website</span>
+                </a>
+            </nav>
+        </div>
+    </aside>
+    
+    <!-- Main content -->
+    <main style="flex: 1; padding: 32px;">
+        <!-- Header -->
+        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 32px;">
+            <div>
+                <h1 style="font-size: 24px; font-weight: bold; color: #1f2937;">
+                    <i class="fas fa-gift text-primary mr-2"></i>Quản lý khuyến mãi đặc biệt
+                </h1>
+                <p style="color: #6b7280;">Thiết lập sản phẩm khuyến mãi hiển thị trên trang chủ (Tối đa 5 sản phẩm)</p>
+            </div>
+            <div style="display: flex; align-items: center; gap: 16px;">
+                <span style="padding: 8px 16px; background: {% if promotion_count >= max_promotions %}#ef4444{% else %}#22c55e{% endif %}; color: white; border-radius: 8px; font-size: 14px;">
+                    {{ promotion_count }}/{{ max_promotions }} sản phẩm
+                </span>
+                <button type="button" onclick="openAddPromotionModal()" 
+                    {% if promotion_count >= max_promotions %}disabled style="opacity: 0.5; cursor: not-allowed;"{% endif %}
+                    style="padding: 10px 20px; background: #2563eb; color: white; border: none; border-radius: 8px; font-size: 14px; cursor: pointer;"
+                    onmouseover="this.style.background='#1d4ed8'"
+                    onmouseout="this.style.background='#2563eb'">
+                    <i class="fas fa-plus mr-2"></i>Thêm khuyến mãi
+                </button>
+            </div>
+        </div>
+        
+        <!-- Messages -->
+        {% if messages %}
+        <div style="margin-bottom: 16px;">
+            {% for message in messages %}
+                <div style="padding: 10px 14px; border-radius: 8px; margin-bottom: 8px;
+                    {% if message.tags == 'success' %}
+                        background: #dcfce7; color: #166534;
+                    {% elif message.tags == 'error' %}
+                        background: #fee2e2; color: #991b1b;
+                    {% else %}
+                        background: #e5e7eb; color: #374151;
+                    {% endif %}">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+        
+        <!-- Current promotions -->
+        <div style="background: white; border-radius: 12px; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1); overflow: hidden;">
+            <div style="padding: 20px 24px; border-bottom: 1px solid #e5e7eb; background: #f9fafb;">
+                <h2 style="font-size: 16px; font-weight: 600; color: #1f2937;">Danh sách khuyến mãi hiện tại</h2>
+            </div>
+            
+            {% if promotions %}
+            <table class="admin-table">
+                <thead>
+                    <tr>
+                        <th style="width: 60px;">STT</th>
+                        <th>Sản phẩm</th>
+                        <th>Hình ảnh</th>
+                        <th>Giá gốc</th>
+                        <th>Giảm giá</th>
+                        <th>Giá khuyến mãi</th>
+                        <th>Trạng thái</th>
+                        <th style="width: 100px;">Thao tác</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for promo in promotions %}
+                    <tr class="promo-item {% if promo.is_active %}active{% endif %}">
+                        <td style="text-align: center; font-weight: 500;">{{ forloop.counter }}</td>
+                        <td>
+                            <div style="font-weight: 500; color: #1f2937;">{{ promo.product.name }}</div>
+                            <div style="font-size: 12px; color: #6b7280;">{{ promo.product.brand }}</div>
+                        </td>
+                        <td>
+                            {% if promo.product.image %}
+                            <img src="{{ promo.product.image.url }}" alt="{{ promo.product.name }}"
+                                style="width: 50px; height: 50px; object-fit: cover; border-radius: 8px;"
+                                onerror="this.src='https://placehold.co/100x100?text=No+Image'">
+                            {% else %}
+                            <span style="font-size: 12px; color: #9ca3af;">—</span>
+                            {% endif %}
+                        </td>
+                        <td style="text-decoration: line-through; color: #9ca3af;"><span class="price-format">{{ promo.product.price|format_number }}</span>₫</td>
+                        <td>
+                            <span style="background: #ef4444; color: white; padding: 4px 12px; border-radius: 20px; font-weight: 600;">
+                                -{{ promo.discount_percent }}%
+                            </span>
+                        </td>
+                        <td style="font-weight: 600; color: #2563eb;"><span class="price-format">{{ promo.discounted_price|format_number }}</span>₫</td>
+                        <td>
+                            {% if promo.is_active %}
+                            <span style="background: #dcfce7; color: #166534; padding: 4px 12px; border-radius: 20px; font-size: 12px;">Đang hoạt động</span>
+                            {% else %}
+                            <span style="background: #fee2e2; color: #991b1b; padding: 4px 12px; border-radius: 20px; font-size: 12px;">Đã tắt</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <button type="button" onclick="deletePromotion({{ promo.id }})" 
+                                style="padding: 8px; background: #fee2e2; color: #dc2626; border: none; border-radius: 8px; cursor: pointer;"
+                                title="Xóa khuyến mãi">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            {% else %}
+            <div style="padding: 60px 24px; text-align: center;">
+                <i class="fas fa-gift text-4xl text-gray-300 mb-4"></i>
+                <p style="color: #6b7280; font-size: 16px;">Chưa có khuyến mãi đặc biệt nào</p>
+                <p style="color: #9ca3af; font-size: 14px; margin-top: 8px;">Nhấn "Thêm khuyến mãi" để thêm sản phẩm</p>
+            </div>
+            {% endif %}
+        </div>
+    </main>
+</div>
+
+<!-- Add Promotion Modal -->
+<div id="add-promotion-modal" class="fixed inset-0 z-40 hidden" style="background: rgba(0,0,0,0.5);">
+    <div class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-full max-w-lg px-4">
+        <div class="modal-content bg-white rounded-xl shadow-2xl p-6 relative z-50">
+            <div class="flex items-center justify-between mb-4">
+                <h3 class="text-lg font-bold text-dark">
+                    <i class="fas fa-plus-circle text-primary mr-2"></i>Thêm khuyến mãi đặc biệt
+                </h3>
+                <button type="button" onclick="closeAddPromotionModal()" class="text-gray-400 hover:text-gray-600 p-1">
+                    <i class="fas fa-times text-xl"></i>
+                </button>
+            </div>
+
+            <form id="addPromotionForm">
+                {% csrf_token %}
+                
+                <div class="space-y-4">
+                    <!-- Product selection -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Sản phẩm <span class="text-red-500">*</span></label>
+                        <select id="productSelect" name="product_id" required
+                            class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent">
+                            <option value=""> Chọn sản phẩm </option>
+                            {% for product in products %}
+                            <option value="{{ product.id }}" data-price="{{ product.price }}" data-image="{% if product.image %}{{ product.image.url }}{% endif %}">{{ product.name }} - <span class="price-format">{{ product.price }}</span>₫</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <!-- Product preview -->
+                    <div id="productPreview" class="hidden p-4 bg-gray-50 rounded-lg">
+                        <div style="display: flex; gap: 16px; align-items: center;">
+                            <img id="previewImage" src="" alt="" onerror="this.src='https://placehold.co/100x100?text=No+Image'" style="width: 80px; height: 80px; object-fit: cover; border-radius: 8px;">
+                            <div>
+                                <p id="previewName" style="font-weight: 500; color: #1f2937;"></p>
+                                <p id="previewPrice" style="color: #6b7280;"></p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Discount percent -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Giảm giá (%) <span class="text-red-500">*</span></label>
+                        <div class="relative">
+                            <input type="number" id="discountPercent" name="discount_percent" min="1" max="99" required
+                                placeholder="Nhập % giảm giá"
+                                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent">
+                            <span class="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500">%</span>
+                        </div>
+                        <p class="text-sm text-gray-500 mt-1">Ví dụ: Nhập 20 để giảm 20%</p>
+                    </div>
+
+                    <!-- Price preview -->
+                    <div id="pricePreview" class="hidden p-4 bg-blue-50 rounded-lg">
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <div>
+                                <p style="font-size: 14px; color: #6b7280;">Giá gốc: <span id="originalPrice" style="text-decoration: line-through;"></span></p>
+                                <p style="font-size: 14px; color: #6b7280;">Giảm: <span id="discountAmount" style="color: #ef4444;"></span></p>
+                            </div>
+                            <div style="text-align: right;">
+                                <p style="font-size: 12px; color: #6b7280;">Giá khuyến mãi:</p>
+                                <p id="finalPrice" style="font-size: 24px; font-weight: bold; color: #2563eb;"></p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Actions -->
+                    <div class="flex justify-end gap-3 mt-6">
+                        <button type="button" onclick="closeAddPromotionModal()"
+                            style="padding: 12px 24px; border: 1px solid #e5e7eb; color: #374151; background: white; border-radius: 8px; cursor: pointer; transition: all 0.2s;">
+                            Hủy
+                        </button>
+                        <button type="button" id="submitPromotionBtn"
+                            style="padding: 12px 24px; background: #2563eb; color: white; border: none; border-radius: 8px; cursor: pointer; transition: background 0.2s;">
+                            <i class="fas fa-check mr-2"></i>Thêm khuyến mãi
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Get CSRF token from cookie
+function getCookie(name) {
+    var cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        var cookies = document.cookie.split(';');
+        for (var i = 0; i < cookies.length; i++) {
+            var cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
+
+// Format prices with thousand separator
+function formatPrice(price) {
+    return parseFloat(price).toLocaleString('vi-VN');
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+    var modal = document.getElementById('add-promotion-modal');
+    var form = document.getElementById('addPromotionForm');
+    var submitBtn = document.getElementById('submitPromotionBtn');
+    var productSelect = document.getElementById('productSelect');
+    var discountInput = document.getElementById('discountPercent');
+    
+    // Format all prices on page load
+    document.querySelectorAll('.price-format').forEach(function(el) {
+        var value = parseFloat(el.textContent);
+        if (!isNaN(value)) {
+            el.textContent = formatPrice(value);
+        }
+    });
+
+    // Modal functions
+    window.openAddPromotionModal = function() {
+        modal.classList.remove('hidden');
+        document.body.style.overflow = 'hidden';
+    };
+
+    window.closeAddPromotionModal = function() {
+        modal.classList.add('hidden');
+        document.body.style.overflow = '';
+        form.reset();
+        document.getElementById('productPreview').classList.add('hidden');
+        document.getElementById('pricePreview').classList.add('hidden');
+    };
+
+    // Close modal when clicking on backdrop
+    modal.addEventListener('click', function(e) {
+        if (e.target === modal) {
+            closeAddPromotionModal();
+        }
+    });
+
+    // Product selection handler
+    if (productSelect) {
+        productSelect.addEventListener('change', function() {
+            var productId = this.value;
+            var preview = document.getElementById('productPreview');
+            var previewImage = document.getElementById('previewImage');
+
+            if (productId) {
+                var option = this.options[this.selectedIndex];
+                var price = option.dataset.price;
+                var imageUrl = option.dataset.image || 'https://placehold.co/100x100?text=No+Image';
+
+                // Set preview content
+                document.getElementById('previewName').textContent = option.text.split(' - ')[0];
+                document.getElementById('previewPrice').textContent = formatPrice(price) + '₫';
+                previewImage.src = imageUrl;
+                previewImage.onerror = function() { this.src = 'https://placehold.co/100x100?text=No+Image'; };
+                preview.classList.remove('hidden');
+                updatePricePreview();
+            } else {
+                preview.classList.add('hidden');
+                document.getElementById('pricePreview').classList.add('hidden');
+            }
+        });
+    }
+
+    // Discount input handler
+    if (discountInput) {
+        discountInput.addEventListener('input', updatePricePreview);
+    }
+
+    function updatePricePreview() {
+        if (productSelect && discountInput && productSelect.value && discountInput.value) {
+            var price = parseInt(productSelect.options[productSelect.selectedIndex].dataset.price);
+            var discount = parseInt(discountInput.value);
+            var discountAmount = price * discount / 100;
+            var finalPrice = price - discountAmount;
+
+            document.getElementById('originalPrice').textContent = formatPrice(price) + '₫';
+            document.getElementById('discountAmount').textContent = formatPrice(discountAmount) + '₫';
+            document.getElementById('finalPrice').textContent = formatPrice(finalPrice) + '₫';
+            document.getElementById('pricePreview').classList.remove('hidden');
+        } else {
+            document.getElementById('pricePreview').classList.add('hidden');
+        }
+    }
+
+    // Submit promotion - click handler
+    if (submitBtn) {
+        submitBtn.addEventListener('click', function() {
+            if (!productSelect || !productSelect.value) {
+                showToast('error', 'Lỗi', 'Vui lòng chọn sản phẩm!');
+                return false;
+            }
+            if (!discountInput || !discountInput.value) {
+                showToast('error', 'Lỗi', 'Vui lòng nhập phần trăm giảm giá!');
+                return false;
+            }
+
+            // Disable button and show loading
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Đang xử lý...';
+
+            var xhr = new XMLHttpRequest();
+            xhr.open('POST', '{% url "add_promotion" %}');
+            xhr.setRequestHeader('Content-Type', 'application/json');
+            xhr.setRequestHeader('X-CSRFToken', getCookie('csrftoken'));
+
+            xhr.onload = function() {
+                console.log('Status:', xhr.status);
+                console.log('Response:', xhr.responseText);
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = '<i class="fas fa-check mr-2"></i>Thêm khuyến mãi';
+
+                if (xhr.status === 200) {
+                    try {
+                        var data = JSON.parse(xhr.responseText);
+                        if (data.success) {
+                            showToast('success', 'Thành công', data.message);
+                            closeAddPromotionModal();
+                            setTimeout(function() {
+                                window.location.reload();
+                            }, 1000);
+                        } else {
+                            showToast('error', 'Lỗi', data.message);
+                        }
+                    } catch (e) {
+                        showToast('error', 'Lỗi', 'Dữ liệu phản hồi không hợp lệ');
+                    }
+                } else {
+                    // Status 500 or other errors - try to get error message
+                    try {
+                        var errorData = JSON.parse(xhr.responseText);
+                        showToast('error', 'Lỗi', errorData.message || 'Lỗi server: ' + xhr.status);
+                    } catch (e) {
+                        showToast('error', 'Lỗi', 'Lỗi server: ' + xhr.status);
+                    }
+                }
+            };
+
+            xhr.onerror = function() {
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = '<i class="fas fa-check mr-2"></i>Thêm khuyến mãi';
+                showToast('error', 'Lỗi', 'Không thể kết nối server');
+            };
+
+            xhr.send(JSON.stringify({
+                product_id: productSelect.value,
+                discount_percent: discountInput.value
+            }));
+        });
+    }
+
+    // Delete promotion
+    window.deletePromotion = function(promotionId) {
+        if (!confirm('Bạn có chắc chắn muốn xóa khuyến mãi này?')) {
+            return;
+        }
+
+        var xhr = new XMLHttpRequest();
+        xhr.open('POST', '/qhun22/promotions/delete/' + promotionId + '/');
+        xhr.setRequestHeader('X-CSRFToken', getCookie('csrftoken'));
+
+        xhr.onload = function() {
+            console.log('Delete Status:', xhr.status);
+            console.log('Delete Response:', xhr.responseText);
+            
+            if (xhr.status === 200) {
+                try {
+                    var data = JSON.parse(xhr.responseText);
+                    if (data.success) {
+                        showToast('success', 'Thành công', data.message);
+                        setTimeout(function() {
+                            window.location.reload();
+                        }, 1000);
+                    } else {
+                        showToast('error', 'Lỗi', data.message);
+                    }
+                } catch (e) {
+                    // Response không phải JSON nhưng có thể đã xóa thành công
+                    showToast('success', 'Thành công', 'Đã xóa khuyến mãi!');
+                    setTimeout(function() {
+                        window.location.reload();
+                    }, 1000);
+                }
+            } else {
+                // Thử parse error message
+                try {
+                    var errorData = JSON.parse(xhr.responseText);
+                    showToast('error', 'Lỗi', errorData.message || 'Lỗi server: ' + xhr.status);
+                } catch(e) {
+                    showToast('error', 'Lỗi', 'Lỗi server: ' + xhr.status);
+                }
+            }
+        };
+
+        xhr.onerror = function() {
+            showToast('error', 'Lỗi', 'Không thể kết nối server');
+        };
+
+        xhr.send();
+    };
+
+    // Close modal on Escape key
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') {
+            closeAddPromotionModal();
+        }
+    });
+});
+</script>
+{% endblock %}

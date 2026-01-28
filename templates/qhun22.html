@@ -1,0 +1,346 @@
+{% extends 'base.html' %}
+
+{% load static %}
+
+{% block title %}Panel - QHUN22{% endblock %}
+
+{% block extra_css %}
+<style>
+    .admin-sidebar {
+        width: 260px;
+        min-height: calc(100vh - 64px);
+        background: linear-gradient(180deg, #1e293b 0%, #0f172a 100%);
+    }
+    
+    .admin-menu-item {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 12px 16px;
+        color: #9ca3af;
+        transition: all 0.2s;
+    }
+    
+    .admin-menu-item:hover {
+        color: white;
+        background: rgba(255, 255, 255, 0.05);
+    }
+    
+    .admin-menu-item.active {
+        color: white;
+        background: rgba(37, 99, 235, 0.2);
+        border-right: 3px solid #2563eb;
+    }
+    
+    .stat-card {
+        background: white;
+        border-radius: 12px;
+        padding: 24px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        border-left: 4px solid;
+    }
+    
+    .stat-card.blue { border-left-color: #3b82f6; }
+    .stat-card.green { border-left-color: #22c55e; }
+    .stat-card.yellow { border-left-color: #eab308; }
+    .stat-card.red { border-left-color: #ef4444; }
+    .stat-card.purple { border-left-color: #a855f7; }
+    .stat-card.orange { border-left-color: #f97316; }
+    
+    .stat-icon {
+        width: 48px;
+        height: 48px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 20px;
+    }
+    
+    .admin-table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+    
+    .admin-table th {
+        background: #f3f4f6;
+        padding: 12px 16px;
+        text-align: left;
+        font-size: 14px;
+        font-weight: 600;
+        color: #374151;
+        border-bottom: 1px solid #e5e7eb;
+    }
+    
+    .admin-table td {
+        padding: 12px 16px;
+        font-size: 14px;
+        color: #374151;
+        border-bottom: 1px solid #f3f4f6;
+    }
+    
+    .admin-table tbody tr:hover td {
+        background: #f9fafb;
+    }
+    
+    .status-badge {
+        display: inline-block;
+        padding: 4px 12px;
+        font-size: 12px;
+        font-weight: 500;
+        border-radius: 9999px;
+    }
+    
+    .status-badge.pending { background: #fef3c7; color: #92400e; }
+    .status-badge.approved { background: #dbeafe; color: #1e40af; }
+    .status-badge.rejected { background: #fee2e2; color: #991b1b; }
+    .status-badge.shipping { background: #f3e8ff; color: #6b21a8; }
+    .status-badge.delivered { background: #dcfce7; color: #166534; }
+</style>
+{% endblock %}
+
+{% block content %}
+
+<div style="display: flex; min-height: calc(100vh - 64px); background: #f3f4f6;">
+   
+    <aside class="admin-sidebar flex-shrink-0">
+        <div style="padding: 24px;">
+            <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 24px;">
+                <div style="width: 40px; height: 40px; background: #2563eb; border-radius: 8px; display: flex; align-items: center; justify-content: center;">
+                    <i class="fas fa-cog" style="color: white;"></i>
+                </div>
+                <div>
+                    <h2 style="color: white; font-weight: bold;">QHUN22</h2>
+                </div>
+            </div>
+            
+            
+                <nav style="display: flex; flex-direction: column; gap: 4px;">
+                    <a href="{% url 'admin_dashboard' %}" class="admin-menu-item active" id="menu-dashboard">
+                        <i class="fas fa-tachometer-alt" style="width: 20px;"></i>
+                        <span>Bảng điều khiển</span>
+                    </a>
+                    <a href="{% url 'admin_promotions' %}" class="admin-menu-item" id="menu-promotions">
+                        <i class="fas fa-gift" style="width: 20px;"></i>
+                        <span>Khuyến mãi đặc biệt</span>
+                    </a>
+                    <a href="#" class="admin-menu-item" id="menu-orders">
+                    <i class="fas fa-shopping-cart" style="width: 20px;"></i>
+                    <span>Quản lý đơn hàng</span>
+                </a>
+                <a href="{% url 'admin_products' %}" class="admin-menu-item" id="menu-products">
+                    <i class="fas fa-mobile-alt" style="width: 20px;"></i>
+                    <span>Quản lý sản phẩm</span>
+                </a>
+                <a href="{% url 'admin_coupons' %}" class="admin-menu-item" id="menu-coupons">
+                    <i class="fas fa-ticket-alt" style="width: 20px;"></i>
+                    <span>Mã khuyến mãi</span>
+                </a>
+                <a href="#" class="admin-menu-item" id="menu-categories">
+                    <i class="fas fa-list" style="width: 20px;"></i>
+                    <span>Quản lý danh mục</span>
+                </a>
+                <a href="#" class="admin-menu-item" id="menu-users">
+                    <i class="fas fa-users" style="width: 20px;"></i>
+                    <span>Quản lý thành viên</span>
+                </a>
+                <a href="#" class="admin-menu-item" id="menu-reports">
+                    <i class="fas fa-chart-bar" style="width: 20px;"></i>
+                    <span>Báo cáo thống kê</span>
+                </a>
+                <hr style="border-color: #374151; margin: 16px 0;">
+                <a href="{% url 'home' %}" class="admin-menu-item">
+                    <i class="fas fa-arrow-left" style="width: 20px;"></i>
+                    <span>Quay lại website</span>
+                </a>
+            </nav>
+        </div>
+    </aside>
+    
+
+    <main style="flex: 1; padding: 32px;">
+     
+        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 32px;">
+            <div>
+                <h1 style="font-size: 24px; font-weight: bold; color: #1f2937;">Bảng điều khiển</h1>
+            </div>
+            <div style="display: flex; align-items: center; gap: 16px;">
+                <span style="color: #6b7280; font-size: 14px;">{{ current_date|date:"d/m/Y" }}</span>
+                <a href="{% url 'logout' %}" style="padding: 8px 16px; background: #ef4444; color: white; border-radius: 8px; font-size: 14px; transition: background 0.2s;" onmouseover="this.style.background='#dc2626'" onmouseout="this.style.background='#ef4444'">
+                    <i class="fas fa-sign-out-alt" style="margin-right: 8px;"></i>Đăng xuất
+                </a>
+            </div>
+        </div>
+        
+      
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 24px; margin-bottom: 32px;">
+         
+            <div class="stat-card blue">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div>
+                        <p style="color: #6b7280; font-size: 14px;">Tổng đơn hàng</p>
+                        <p style="font-size: 36px; font-weight: bold; color: #1f2937; margin-top: 4px;">{{ total_orders }}</p>
+                    </div>
+                    <div class="stat-icon" style="background: #dbeafe; color: #2563eb;">
+                        <i class="fas fa-shopping-cart"></i>
+                    </div>
+                </div>
+                <p style="color: #16a34a; font-size: 14px; margin-top: 8px;">
+                    <i class="fas fa-arrow-up" style="margin-right: 4px;"></i>12% so với tháng trước
+                </p>
+            </div>
+            
+         
+            <div class="stat-card green">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div>
+                        <p style="color: #6b7280; font-size: 14px;">Doanh thu tháng</p>
+                        <p style="font-size: 36px; font-weight: bold; color: #1f2937; margin-top: 4px;">{{ monthly_revenue|floatformat:0 }}₫</p>
+                    </div>
+                    <div class="stat-icon" style="background: #dcfce7; color: #16a34a;">
+                        <i class="fas fa-money-bill-wave"></i>
+                    </div>
+                </div>
+                <p style="color: #16a34a; font-size: 14px; margin-top: 8px;">
+                    <i class="fas fa-arrow-up" style="margin-right: 4px;"></i>8% so với tháng trước
+                </p>
+            </div>
+            
+        
+            <div class="stat-card yellow">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div>
+                        <p style="color: #6b7280; font-size: 14px;">Thành viên mới</p>
+                        <p style="font-size: 36px; font-weight: bold; color: #1f2937; margin-top: 4px;">{{ new_users }}</p>
+                    </div>
+                    <div class="stat-icon" style="background: #fef9c3; color: #ca8a04;">
+                        <i class="fas fa-user-plus"></i>
+                    </div>
+                </div>
+                <p style="color: #16a34a; font-size: 14px; margin-top: 8px;">
+                    <i class="fas fa-arrow-up" style="margin-right: 4px;"></i>5% so với tháng trước
+                </p>
+            </div>
+            
+          
+            <div class="stat-card purple">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div>
+                        <p style="color: #6b7280; font-size: 14px;">Tổng doanh thu</p>
+                        <p style="font-size: 36px; font-weight: bold; color: #1f2937; margin-top: 4px;">{{ total_revenue|floatformat:0 }}₫</p>
+                    </div>
+                    <div class="stat-icon" style="background: #f3e8ff; color: #9333ea;">
+                        <i class="fas fa-chart-line"></i>
+                    </div>
+                </div>
+                <p style="color: #16a34a; font-size: 14px; margin-top: 8px;">
+                    <i class="fas fa-arrow-up" style="margin-right: 4px;"></i>15% so với tháng trước
+                </p>
+            </div>
+        </div>
+        
+   
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 24px; margin-bottom: 32px;">
+      
+            <div class="stat-card yellow">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div>
+                        <p style="color: #6b7280; font-size: 14px;">Chờ xác nhận</p>
+                        <p style="font-size: 32px; font-weight: bold; color: #1f2937; margin-top: 4px;">{{ pending_orders }}</p>
+                    </div>
+                    <div class="stat-icon" style="background: #fef9c3; color: #ca8a04;">
+                        <i class="fas fa-clock"></i>
+                    </div>
+                </div>
+            </div>
+            
+      
+            <div class="stat-card blue">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div>
+                        <p style="color: #6b7280; font-size: 14px;">Đã xác nhận</p>
+                        <p style="font-size: 32px; font-weight: bold; color: #1f2937; margin-top: 4px;">{{ approved_orders }}</p>
+                    </div>
+                    <div class="stat-icon" style="background: #dbeafe; color: #2563eb;">
+                        <i class="fas fa-check"></i>
+                    </div>
+                </div>
+         
+            <div class="stat-card green">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div>
+                        <p style="color: #6b7280; font-size: 14px;">Hoàn thành</p>
+                        <p style="font-size: 32px; font-weight: bold; color: #1f2937; margin-top: 4px;">{{ delivered_orders }}</p>
+                    </div>
+                    <div class="stat-icon" style="background: #dcfce7; color: #16a34a;">
+                        <i class="fas fa-check-circle"></i>
+                    </div>
+                </div>
+            </div>
+            
+           
+            <div class="stat-card red">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div>
+                        <p style="color: #6b7280; font-size: 14px;">Đã hủy</p>
+                        <p style="font-size: 32px; font-weight: bold; color: #1f2937; margin-top: 4px;">{{ rejected_orders }}</p>
+                    </div>
+                    <div class="stat-icon" style="background: #fee2e2; color: #dc2626;">
+                        <i class="fas fa-times-circle"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+       
+        <div style="background: white; border-radius: 12px; padding: 24px; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);">
+            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px;">
+                <h2 style="font-size: 18px; font-weight: bold; color: #1f2937;">Đơn hàng gần đây</h2>
+                <a href="#" style="color: #2563eb; font-size: 14px; text-decoration: none;" onmouseover="this.style.textDecoration='underline'" onmouseout="this.style.textDecoration='none'">Xem tất cả <i class="fas fa-arrow-right" style="margin-left: 4px;"></i></a>
+            </div>
+            
+            {% if recent_orders %}
+            <table class="admin-table">
+                <thead>
+                    <tr>
+                        <th>Mã đơn</th>
+                        <th>Khách hàng</th>
+                        <th>Ngày đặt</th>
+                        <th>Tổng tiền</th>
+                        <th>Trạng thái</th>
+                        <th>Thao tác</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for order in recent_orders %}
+                    <tr>
+                        <td style="font-weight: 500;">#{{ order.id }}</td>
+                        <td>{{ order.user.username }}</td>
+                        <td>{{ order.created_at|date:"d/m/Y H:i" }}</td>
+                        <td style="font-weight: 500; color: #2563eb;">{{ order.total_amount|floatformat:0 }}₫</td>
+                        <td>
+                            <span class="status-badge {{ order.status }}">
+                                {{ order.get_status_display }}
+                            </span>
+                        </td>
+                        <td>
+                            <button style="color: #2563eb; background: none; border: none; cursor: pointer; font-size: 14px;">
+                                <i class="fas fa-eye"></i> Xem
+                            </button>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            {% else %}
+            <div style="text-align: center; padding: 32px;">
+                <i class="fas fa-shopping-cart" style="font-size: 48px; color: #d1d5db; margin-bottom: 12px;"></i>
+                <p style="color: #6b7280;">Chưa có đơn hàng nào</p>
+            </div>
+            {% endif %}
+        </div>
+    </main>
+</div>
+{% endblock %}
+
+{% block extra_js %}{% endblock %}

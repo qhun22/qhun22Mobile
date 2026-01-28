@@ -1,0 +1,314 @@
+{% extends 'base.html' %}
+
+{% load static %}
+{% load format_filters %}
+
+{% block title %}{{ product.name }} - ShopMobile{% endblock %}
+
+{% block extra_css %}
+<style>
+    .product-gallery-thumb {
+        cursor: pointer;
+        opacity: 0.7;
+        transition: all 0.2s ease;
+    }
+    .product-gallery-thumb:hover,
+    .product-gallery-thumb.active {
+        opacity: 1;
+        border-color: #2563eb;
+    }
+    .quantity-btn {
+        width: 36px;
+        height: 36px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border: 1px solid #e5e7eb;
+        background: white;
+        cursor: pointer;
+        transition: all 0.2s ease;
+    }
+    .quantity-btn:hover {
+        background: #f3f4f6;
+        border-color: #2563eb;
+    }
+    .quantity-input {
+        width: 60px;
+        text-align: center;
+        border: 1px solid #e5e7eb;
+        border-left: none;
+        border-right: none;
+    }
+    .spec-table tr:nth-child(odd) {
+        background: #f9fafb;
+    }
+    .spec-table td {
+        padding: 12px 16px;
+    }
+    .spec-table td:first-child {
+        width: 200px;
+        color: #6b7280;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+    <!-- ==================== PRODUCT DETAIL PAGE ==================== -->
+    <section class="max-w-7xl mx-auto px-4 py-8">
+        <!-- Breadcrumb -->
+        <nav class="flex items-center gap-2 text-sm text-gray-500 mb-6">
+            <a href="{% url 'home' %}" class="hover:text-primary transition-colors">
+                <i class="fas fa-home"></i> Trang chu
+            </a>
+            <i class="fas fa-chevron-right text-xs"></i>
+            <a href="?brand={{ product.brand }}" class="hover:text-primary transition-colors">{{ product.brand }}</a>
+            <i class="fas fa-chevron-right text-xs"></i>
+            <span class="text-gray-800">{{ product.name }}</span>
+        </nav>
+
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            <!-- Product Images -->
+            <div class="space-y-4">
+                <!-- Main Image -->
+                <div class="bg-white rounded-xl shadow-md overflow-hidden">
+                    <div class="aspect-square relative bg-gray-100">
+                        <img id="mainImage"
+                            src="https://placehold.co/600x600/2563eb/white?text={{ product.name|urlencode }}"
+                            alt="{{ product.name }}"
+                            class="w-full h-full object-cover"
+                            onerror="this.src='https://placehold.co/600x600?text=No+Image'">
+                        {% if product.is_on_sale %}
+                        <div class="absolute top-4 left-4 bg-red-500 text-white px-3 py-1 rounded-lg font-bold">
+                            GIẢM {{ product.discount_percent }}%
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- Thumbnails -->
+                <div class="flex gap-3 overflow-x-auto">
+                    <div class="product-gallery-thumb active flex-shrink-0 w-20 h-20 border-2 border-primary rounded-lg overflow-hidden">
+                        <img src="https://placehold.co/150x150/2563eb/white?text=1"
+                            alt="Thumbnail 1" class="w-full h-full object-cover">
+                    </div>
+                    <div class="product-gallery-thumb flex-shrink-0 w-20 h-20 border-2 border-gray-200 rounded-lg overflow-hidden">
+                        <img src="https://placehold.co/150x150/2563eb/white?text=2"
+                            alt="Thumbnail 2" class="w-full h-full object-cover">
+                    </div>
+                    <div class="product-gallery-thumb flex-shrink-0 w-20 h-20 border-2 border-gray-200 rounded-lg overflow-hidden">
+                        <img src="https://placehold.co/150x150/2563eb/white?text=3"
+                            alt="Thumbnail 3" class="w-full h-full object-cover">
+                    </div>
+                    <div class="product-gallery-thumb flex-shrink-0 w-20 h-20 border-2 border-gray-200 rounded-lg overflow-hidden">
+                        <img src="https://placehold.co/150x150/2563eb/white?text=4"
+                            alt="Thumbnail 4" class="w-full h-full object-cover">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Product Info -->
+            <div class="space-y-6">
+                <!-- Title & Brand -->
+                <div>
+                    <p class="text-sm text-gray-500 mb-1">{{ product.brand }}</p>
+                    <h1 class="text-2xl lg:text-3xl font-bold text-gray-900">{{ product.name }}</h1>
+                </div>
+
+                <!-- Price -->
+                <div class="flex items-baseline gap-3">
+                    <span class="text-3xl font-bold text-red-600">{{ product.price|format_number }}₫</span>
+                    {% if product.original_price %}
+                    <span class="text-lg text-gray-400 line-through">{{ product.original_price|format_number }}₫</span>
+                    {% endif %}
+                </div>
+
+                <!-- Stock Status -->
+                <div class="flex items-center gap-2">
+                    {% if product.stock > 0 %}
+                    <span class="px-3 py-1 bg-green-100 text-green-700 text-sm rounded-full">
+                        <i class="fas fa-check-circle mr-1"></i>Con hang
+                    </span>
+                    <span class="text-sm text-gray-500">({{ product.stock }} san pham)</span>
+                    {% else %}
+                    <span class="px-3 py-1 bg-red-100 text-red-700 text-sm rounded-full">
+                        <i class="fas fa-times-circle mr-1"></i>Het hang
+                    </span>
+                    {% endif %}
+                </div>
+
+                <!-- Color Options -->
+                <div>
+                    <p class="text-sm font-medium text-gray-700 mb-2">Mau sac</p>
+                    <div class="flex gap-2">
+                        <button class="w-8 h-8 rounded-full bg-black border-2 border-gray-300 cursor-pointer hover:border-primary transition-colors"></button>
+                        <button class="w-8 h-8 rounded-full bg-gray-400 border-2 border-gray-300 cursor-pointer hover:border-primary transition-colors"></button>
+                        <button class="w-8 h-8 rounded-full bg-blue-600 border-2 border-gray-300 cursor-pointer hover:border-primary transition-colors"></button>
+                        <button class="w-8 h-8 rounded-full bg-purple-600 border-2 border-gray-300 cursor-pointer hover:border-primary transition-colors"></button>
+                    </div>
+                </div>
+
+                <!-- Storage Options -->
+                <div>
+                    <p class="text-sm font-medium text-gray-700 mb-2">Dung luong</p>
+                    <div class="flex gap-2 flex-wrap">
+                        <button class="px-4 py-2 border border-primary bg-primary/10 text-primary rounded-lg font-medium cursor-pointer">
+                            128GB
+                        </button>
+                        <button class="px-4 py-2 border border-gray-300 rounded-lg font-medium cursor-pointer hover:border-primary transition-colors">
+                            256GB
+                        </button>
+                        <button class="px-4 py-2 border border-gray-300 rounded-lg font-medium cursor-pointer hover:border-primary transition-colors">
+                            512GB
+                        </button>
+                        <button class="px-4 py-2 border border-gray-300 rounded-lg font-medium cursor-pointer hover:border-primary transition-colors">
+                            1TB
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Quantity -->
+                <div>
+                    <p class="text-sm font-medium text-gray-700 mb-2">So luong</p>
+                    <div class="flex items-center gap-0 w-fit">
+                        <button class="quantity-btn rounded-l-lg" onclick="updateQuantity(-1)">
+                            <i class="fas fa-minus"></i>
+                        </button>
+                        <input type="text" id="quantity" value="1" readonly
+                            class="quantity-input py-2 text-center font-medium focus:outline-none">
+                        <button class="quantity-btn rounded-r-lg" onclick="updateQuantity(1)">
+                            <i class="fas fa-plus"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="flex gap-4">
+                    <button class="flex-1 py-4 bg-red-500 hover:bg-red-600 text-white font-semibold rounded-xl transition-colors cursor-pointer">
+                        <i class="fas fa-shopping-cart mr-2"></i>Mua ngay
+                    </button>
+                    <button class="flex-1 py-4 bg-primary hover:bg-secondary text-white font-semibold rounded-xl transition-colors cursor-pointer">
+                        <i class="fas fa-cart-plus mr-2"></i>Them vao gio
+                    </button>
+                    <button class="w-14 h-14 flex items-center justify-center border border-gray-300 rounded-xl hover:border-red-500 hover:text-red-500 transition-colors cursor-pointer">
+                        <i class="far fa-heart text-xl"></i>
+                    </button>
+                </div>
+
+                <!-- Promotions -->
+                <div class="bg-yellow-50 border border-yellow-200 rounded-xl p-4">
+                    <h3 class="font-semibold text-yellow-800 mb-2">
+                        <i class="fas fa-gift mr-2"></i>Khuyen mai dac biet
+                    </h3>
+                    <ul class="space-y-2 text-sm text-yellow-700">
+                        <li class="flex items-start gap-2">
+                            <i class="fas fa-check text-green-500 mt-0.5"></i>
+                            <span>Giam 500.000d cho don hang tu 10 trieu</span>
+                        </li>
+                        <li class="flex items-start gap-2">
+                            <i class="fas fa-check text-green-500 mt-0.5"></i>
+                            <span>Tra gop 0% qua the tin dung</span>
+                        </li>
+                        <li class="flex items-start gap-2">
+                            <i class="fas fa-check text-green-500 mt-0.5"></i>
+                            <span>Do tra thu cu, gia cao</span>
+                        </li>
+                    </ul>
+                </div>
+
+                <!-- Contact -->
+                <div class="flex gap-4">
+                    <div class="flex items-center gap-2 text-sm text-gray-600">
+                        <i class="fas fa-phone text-primary"></i>
+                        <span>1800.xxxx (miễn phí)</span>
+                    </div>
+                    <div class="flex items-center gap-2 text-sm text-gray-600">
+                        <i class="fas fa-comment text-primary"></i>
+                        <span>Chat voi chung toi</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Product Details Tabs -->
+        <div class="mt-12">
+            <div class="border-b border-gray-200">
+                <nav class="flex gap-8">
+                    <button class="py-4 text-primary border-b-2 border-primary font-medium cursor-pointer">
+                        Thong tin chi tiet
+                    </button>
+                    <button class="py-4 text-gray-500 hover:text-gray-700 cursor-pointer">
+                        Thong so ky thuat
+                    </button>
+                    <button class="py-4 text-gray-500 hover:text-gray-700 cursor-pointer">
+                        Danh gia ({{ reviews.count }} danh gia)
+                    </button>
+                </nav>
+            </div>
+
+            <div class="py-8">
+                <h2 class="text-xl font-bold text-gray-900 mb-4">Mo ta san pham</h2>
+                <div class="prose max-w-none text-gray-600">
+                    {{ product.description|linebreaks }}
+                </div>
+            </div>
+        </div>
+
+        <!-- Related Products -->
+        <div class="mt-12">
+            <h2 class="text-xl font-bold text-gray-900 mb-6">San pham lien quan</h2>
+            <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-4">
+                <!-- Related products would be loaded here -->
+                {% for i in "12345" %}
+                <a href="#" class="product-card">
+                    <div class="aspect-[3/4] relative overflow-hidden bg-gray-100">
+                        <img src="https://placehold.co/300x400/2563eb/white?text=Related+{{ i }}"
+                            alt="Related product" class="w-full h-full object-cover">
+                    </div>
+                    <div class="p-3">
+                        <h3 class="product-name group-hover:text-primary transition-colors">
+                            San pham lien quan {{ i }}
+                        </h3>
+                        <div class="mt-2">
+                            <span class="promo-current-price">19.990.000₫</span>
+                        </div>
+                    </div>
+                </a>
+                {% endfor %}
+            </div>
+        </div>
+    </section>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Quantity update
+    function updateQuantity(change) {
+        const input = document.getElementById('quantity');
+        let value = parseInt(input.value) || 1;
+        value += change;
+        if (value < 1) value = 1;
+        if (value > 10) value = 10;
+        input.value = value;
+    }
+
+    // Gallery thumbnail click
+    document.querySelectorAll('.product-gallery-thumb').forEach(thumb => {
+        thumb.addEventListener('click', function() {
+            // Update active state
+            document.querySelectorAll('.product-gallery-thumb').forEach(t => {
+                t.classList.remove('active', 'border-primary');
+                t.classList.add('border-gray-200');
+            });
+            this.classList.add('active', 'border-primary');
+            this.classList.remove('border-gray-200');
+
+            // Update main image
+            const imgSrc = this.querySelector('img').src.replace('150x150', '600x600');
+            document.getElementById('mainImage').src = imgSrc;
+        });
+    });
+</script>
+{% endblock %}
+
+
+

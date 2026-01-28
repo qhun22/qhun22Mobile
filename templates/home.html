@@ -1,0 +1,1202 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load format_filters %}
+
+{% block title %}ShopMobile - Điện Thoại Chính Hãng{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* Product Detail Modal Styles */
+    .spec-item {
+        display: flex;
+        justify-content: space-between;
+        padding: 12px 16px;
+        background: #f8fafc;
+        border-radius: 8px;
+    }
+    .spec-label {
+        color: #6b7280;
+        font-size: 14px;
+    }
+    .spec-value {
+        color: #1f2937;
+        font-weight: 500;
+        font-size: 14px;
+    }
+    .storage-btn.active, .color-btn.active {
+        border-color: #2563eb !important;
+        background: #eff6ff !important;
+    }
+    .tab-btn.active {
+        border-color: #2563eb !important;
+        color: #2563eb !important;
+    }
+    .thumb-btn.active {
+        border-color: #2563eb !important;
+    }
+    
+    /* Spinner animation */
+    @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+    }
+    
+    /* Loading spinner */
+    .spinner {
+        width: 48px;
+        height: 48px;
+        border: 4px solid #e5e7eb;
+        border-top-color: #2563eb;
+        border-radius: 50%;
+        animation: spin 0.8s linear infinite;
+    }
+    
+    /* Fade in up animation for products */
+    @keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(30px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+    <!-- ==================== BANNER CHÍNH (Slider) ==================== -->
+    <section class="max-w-7xl mx-auto px-4 py-6">
+        <div class="relative rounded-2xl overflow-hidden shadow-xl">
+            <!-- Slider Container -->
+            <div class="relative h-[400px] bg-gray-900" id="mainSlider">
+                <!-- Slide 1 -->
+                <div class="banner-slide absolute inset-0 opacity-100" data-slide="0">
+                    <video class="w-full h-full object-cover" autoplay muted loop playsinline>
+                        <source src="{% static 'videos/applestuff3.mp4' %}" type="video/mp4">
+                    </video>
+
+                    <div class="absolute inset-0 bg-gradient-to-r from-black/50 to-transparent flex items-center">
+                        <div class="pl-12">
+                            <h2 class="text-4xl font-bold text-white mb-2">IPHONE</h2>
+                            <p class="text-gray-200 text-lg mb-4">Trải nghiệm công nghệ vượt trội</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Slide 2 -->
+                <div class="banner-slide absolute inset-0 opacity-0" data-slide="1">
+                    <video src="{% static 'videos/kv_exclusive_noText_PC.mp4' %}" class="w-full h-full object-cover" autoplay muted
+                        loop playsinline>
+                    </video>
+
+                    <div class="absolute inset-0 bg-gradient-to-r from-black/50 to-transparent flex items-center">
+                        <div class="pl-12">
+                            <h2 class="text-4xl font-bold text-white mb-2">SAMSUNG</h2>
+                            <p class="text-gray-200 text-lg mb-4">Camera siêu zoom 100x</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Slide 3 -->
+                <div class="banner-slide absolute inset-0 opacity-0" data-slide="2">
+                    <video class="w-full h-full object-cover" autoplay muted loop playsinline>
+                        <source src="{% static 'videos/pc_ksp_5s.mp4' %}" type="video/mp4">
+                    </video>
+
+                    <div class="absolute inset-0 bg-gradient-to-r from-black/50 to-transparent flex items-center">
+                        <div class="pl-12">
+                            <h2 class="text-4xl font-bold text-white mb-2">XIAOMI</h2>
+                            <p class="text-gray-200 text-lg mb-4">
+                                Snapdragon 8 Elite – Hiệu năng vượt xa
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Slide 4 -->
+                <div class="banner-slide absolute inset-0 opacity-0" data-slide="3">
+                    <video class="w-full h-full object-cover" autoplay muted loop playsinline>
+                        <source src="{% static 'videos/raidenei26th06.mp4' %}" type="video/mp4">
+                    </video>
+
+                    <div class="absolute inset-0 bg-gradient-to-r from-black/50 to-transparent flex items-center">
+                        <div class="pl-12">
+                            <h2 class="text-4xl font-bold text-white mb-2">OPPO</h2>
+                            <p class="text-gray-200 text-lg mb-4">
+                                Hệ thống camera Hasselblad
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- Nút chuyển trái -->
+            <button id="prevBtn" class="absolute left-2 top-1/2 -translate-y-1/2
+         w-9 h-9 bg-white/90 hover:bg-white
+         text-gray-700 text-lg
+         rounded-full flex items-center justify-center
+         shadow-md transition hover:scale-105">
+                <i class="fas fa-chevron-left"></i>
+            </button>
+
+            <!-- Nút chuyển phải -->
+            <button id="nextBtn" class="absolute right-2 top-1/2 -translate-y-1/2
+         w-9 h-9 bg-white/90 hover:bg-white
+         text-gray-700 text-lg
+         rounded-full flex items-center justify-center
+         shadow-md transition hover:scale-105">
+                <i class="fas fa-chevron-right"></i>
+            </button>
+            <!-- Indicator (Dots) -->
+            <div class="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex gap-2" id="dotsContainer">
+                <button
+                    class="w-3 h-3 rounded-full bg-white/90 hover:bg-white transition-all duration-300 dot-btn active"
+                    data-slide="0"></button>
+                <button class="w-3 h-3 rounded-full bg-white/40 hover:bg-white transition-all duration-300 dot-btn"
+                    data-slide="1"></button>
+                <button class="w-3 h-3 rounded-full bg-white/40 hover:bg-white transition-all duration-300 dot-btn"
+                    data-slide="2"></button>
+                <button class="w-3 h-3 rounded-full bg-white/40 hover:bg-white transition-all duration-300 dot-btn"
+                    data-slide="3"></button>
+            </div>
+        </div>
+    </section>
+
+    <!-- ==================== BANNER PHỤ (Auto Slider) ==================== -->
+    <section class="max-w-7xl mx-auto px-4 pb-8">
+        <div class="auto-slider-container rounded-2xl shadow-lg">
+            <div class="auto-slider-track" id="autoSliderTrack">
+                <!-- Banner 1 -->
+                <div class="auto-slider-item">
+                    <a href="#" class="block hover-lift">
+                        <img src="{% static 'images/H2_614x212_308d97e5f4.webp' %}" alt="Banner 1"
+                            class="w-full h-[200px] object-cover">
+                    </a>
+                </div>
+                <!-- Banner 2 -->
+                <div class="auto-slider-item">
+                    <a href="#" class="block hover-lift">
+                        <img src="{% static 'images/872375.png' %}" alt="Banner 2" class="w-full h-[200px] object-cover">
+                    </a>
+                </div>
+                <!-- Banner 3 -->
+                <div class="auto-slider-item">
+                    <a href="#" class="block hover-lift">
+                        <img src="{% static 'images/H2_614x212_d46b00f4cd.jpg' %}" alt="Banner 3"
+                            class="w-full h-[200px] object-cover">
+                    </a>
+                </div>
+                <!-- Banner 4 -->
+                <div class="auto-slider-item">
+                    <a href="#" class="block hover-lift">
+                        <img src="{% static 'images/572723.png' %}" alt="Banner 4" class="w-full h-[200px] object-cover">
+                    </a>
+                </div>
+                <!-- Clone banner 1 & 2 để loop mượt -->
+                <div class="auto-slider-item">
+                    <a href="#" class="block hover-lift">
+                        <img src="{% static 'images/H2_614x212_d46b00f4cd.webp' %}" alt="Banner 1"
+                            class="w-full h-[200px] object-cover">
+                    </a>
+                </div>
+                <div class="auto-slider-item">
+                    <a href="#" class="block hover-lift">
+                        <img src="{% static 'images/H2_612x212_9ca25e6b00.webp' %}" alt="Banner 2"
+                            class="w-full h-[200px] object-cover">
+                    </a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ==================== DANH MỤC ĐIỆN THOẠI ==================== -->
+    <section class="max-w-7xl mx-auto px-4 py-8">
+        <!-- Tiêu đề -->
+        <div class="flex items-center justify-center gap-4 mb-6">
+            <div class="flex-1 h-px bg-gradient-to-l from-primary to-transparent max-w-[100px]"></div>
+            <div class="flex items-center gap-3">
+                <h2 class="text-xl font-bold text-dark whitespace-nowrap">DANH MỤC ĐIỆN THOẠI</h2>
+            </div>
+            <div class="flex-1 h-px bg-gradient-to-r from-primary to-transparent max-w-[100px]"></div>
+        </div>
+
+        <!-- Danh sách 1 hàng, 10 hãng đầu tiên -->
+        <div class="brand-scroll-container">
+            <div class="brand-row">
+                <!-- 1. iPhone -->
+                <a href="?brand=iPhone" class="brand-card">
+                    <div class="brand-card-inner">
+                        <div class="brand-logo">
+                            <img src="{% static 'images/logo_iphone_ngang_eac93ff477.webp' %}" alt="iPhone">
+                        </div>
+                    </div>
+                </a>
+
+                <!-- 2. Samsung -->
+                <a href="?brand=Samsung" class="brand-card">
+                    <div class="brand-card-inner">
+                        <div class="brand-logo">
+                            <img src="{% static 'images/logo_samsung_ngang_1624d75bd8.webp' %}" alt="Samsung">
+                        </div>
+                    </div>
+                </a>
+
+                <!-- 3. Xiaomi -->
+                <a href="?brand=Xiaomi" class="brand-card">
+                    <div class="brand-card-inner">
+                        <div class="brand-logo">
+                            <img src="{% static 'images/logo_xiaomi_ngang_0faf267234.webp' %}" alt="Xiaomi">
+                        </div>
+                    </div>
+                </a>
+
+                <!-- 4. Oppo-->
+                <a href="?brand=OPPO" class="brand-card">
+                    <div class="brand-card-inner">
+                        <div class="brand-logo">
+                            <img src="{% static 'images/logo_oppo_ngang_68d31fcd73.webp' %}" alt="OPPO">
+                        </div>
+                    </div>
+                </a>
+
+                <!-- 5. Vivo -->
+                <a href="?brand=vivo" class="brand-card">
+                    <div class="brand-card-inner">
+                        <div class="brand-logo">
+                            <img src="{% static 'images/logo_vivo_ngang_45494ff733.webp' %}" alt="Vivo">
+                        </div>
+                    </div>
+                </a>
+
+                <!-- 6. Realme -->
+                <a href="?brand=realme" class="brand-card">
+                    <div class="brand-card-inner">
+                        <div class="brand-logo">
+                            <img src="{% static 'images/logo_realme_ngang_0185815a13.webp' %}" alt="Realme">
+                        </div>
+                    </div>
+                </a>
+
+                <!-- 7. Honor -->
+                <a href="?brand=Honor" class="brand-card">
+                    <div class="brand-card-inner">
+                        <div class="brand-logo">
+                            <img src="{% static 'images/logo_honor_ngang_814fca59e4.webp' %}" alt="Honor">
+                        </div>
+                    </div>
+                </a>
+
+                <!-- 8. Redmagic -->
+                <a href="?brand=RedMagic" class="brand-card">
+                    <div class="brand-card-inner">
+                        <div class="brand-logo">
+                            <img src="{% static 'images/logo_redmagic_ngang_505d29c537.webp' %}" alt="Redmagic">
+                        </div>
+                    </div>
+                </a>
+
+                <!-- 9. Tecno -->
+                <a href="?brand=Tecno" class="brand-card">
+                    <div class="brand-card-inner">
+                        <div class="brand-logo">
+                            <img src="{% static 'images/logo_tecno_ngang_c587e5f1fa.webp' %}" alt="Tecno">
+                        </div>
+                    </div>
+                </a>
+
+                <!-- 10. Benco -->
+                <a href="?brand=Benco" class="brand-card">
+                    <div class="brand-card-inner">
+                        <div class="brand-logo">
+                            <img src="{% static 'images/logo_benco_ngang_d31d9c3b77.webp' %}" alt="Benco">
+                        </div>
+                    </div>
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- ==================== KHUYẾN MÃI ĐẶC BIỆT ==================== -->
+    <section class="max-w-7xl mx-auto px-4 pb-8">
+        <div class="promo-section rounded-t-[20px] overflow-hidden">
+            <!-- Banner khuyến mãi -->
+            <div class="promo-banner">
+                <img src="{% static 'images/bnv.png' %}" alt="Khuyến mãi đặc biệt" class="w-full h-auto max-h-[180px] object-cover">
+            </div>
+
+            <!-- Danh sách sản phẩm khuyến mãi (Max 5 sản phẩm) -->
+            <div class="promo-products bg-[#B0AFC6]">
+                <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 p-4">
+                    {% for promo in special_promotions %}
+                    <div class="promo-product-card cursor-pointer" onclick="openProductDetailModal({{ promo.product.id }})">
+                        <div class="aspect-[3/4] relative overflow-hidden bg-gray-100 rounded-lg">
+                            {% if promo.product.image %}
+                            <img src="{{ promo.product.image.url }}" alt="{{ promo.product.name }}"
+                                class="w-full h-full object-cover"
+                                onerror="this.src='https://placehold.co/300x400?text=No+Image'">
+                            {% else %}
+                            <img src="https://placehold.co/300x400?text={{ promo.product.name|urlencode }}"
+                                class="w-full h-full object-cover">
+                            {% endif %}
+                            <div class="discount-badge">GIẢM {{ promo.discount_percent }}%</div>
+                        </div>
+                        <div class="p-3">
+                            <h3 class="promo-product-name group-hover:text-primary transition-colors line-clamp-2">
+                                {{ promo.product.name }}
+                            </h3>
+                            <div class="mt-2">
+                                <span class="promo-current-price"><span class="price-format">{{ promo.discounted_price|format_number }}</span>₫</span>
+                                <span class="promo-original-price"><span class="price-format">{{ promo.product.price|format_number }}</span>₫</span>
+                            </div>
+                        </div>
+                    </div>
+                    {% empty %}
+                    <div class="col-span-full text-center py-8">
+                        <i class="fas fa-gift text-4xl text-gray-400 mb-3"></i>
+                        <p class="text-gray-500">Chưa có khuyến mãi đặc biệt nào</p>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ==================== DANH SÁCH ĐIỆN THOẠI ==================== -->
+    <section class="max-w-7xl mx-auto px-4 py-8">
+        <!-- Tiêu đề -->
+        <div class="flex items-center justify-center gap-4 mb-6">
+            <div class="flex-1 h-px bg-gradient-to-l from-primary to-transparent max-w-[100px]"></div>
+            <h2 class="text-xl font-bold text-dark whitespace-nowrap">TẤT CẢ ĐIỆN THOẠI</h2>
+            <div class="flex-1 h-px bg-gradient-to-r from-primary to-transparent max-w-[100px]"></div>
+        </div>
+
+        <!-- Thanh tìm kiếm và bộ lọc -->
+        <form method="GET" action="." class="bg-white rounded-xl shadow-md p-4 mb-6">
+            <div class="flex flex-wrap gap-4 items-end">
+                <!-- Tìm kiếm -->
+                <div class="flex-1 min-w-[200px]">
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Tìm kiếm</label>
+                    <div class="relative">
+                        <i class="fas fa-search absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"></i>
+                        <input type="text" name="q" value="{{ search_query|default:'' }}" placeholder="Tên điện thoại, hãng..."
+                            class="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent">
+                    </div>
+                </div>
+
+                <!-- Lọc theo hãng -->
+                <div class="min-w-[150px]">
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Hãng</label>
+                    <select name="brand" class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary bg-white cursor-pointer">
+                        <option value="">Tất cả</option>
+                        <option value="iPhone" {% if brand_filter == 'iPhone' %}selected{% endif %}>iPhone</option>
+                        <option value="Samsung" {% if brand_filter == 'Samsung' %}selected{% endif %}>Samsung</option>
+                        <option value="OPPO" {% if brand_filter == 'OPPO' %}selected{% endif %}>OPPO</option>
+                        <option value="vivo" {% if brand_filter == 'vivo' %}selected{% endif %}>vivo</option>
+                        <option value="realme" {% if brand_filter == 'realme' %}selected{% endif %}>realme</option>
+                        <option value="Honor" {% if brand_filter == 'Honor' %}selected{% endif %}>Honor</option>
+                        <option value="RedMagic" {% if brand_filter == 'RedMagic' %}selected{% endif %}>RedMagic</option>
+                        <option value="Tecno" {% if brand_filter == 'Tecno' %}selected{% endif %}>Tecno</option>
+                        <option value="Benco" {% if brand_filter == 'Benco' %}selected{% endif %}>Benco</option>
+                    </select>
+                </div>
+
+                <!-- Lọc theo giá -->
+                <div class="min-w-[150px]">
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Khoảng giá</label>
+                    <select name="price" class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary bg-white cursor-pointer">
+                        <option value="">Tất cả</option>
+                        <option value="0-2000000" {% if price_filter == '0-2000000' %}selected{% endif %}>Dưới 2 triệu</option>
+                        <option value="2000000-4000000" {% if price_filter == '2000000-4000000' %}selected{% endif %}>2 - 4 triệu</option>
+                        <option value="4000000-7000000" {% if price_filter == '4000000-7000000' %}selected{% endif %}>4 - 7 triệu</option>
+                        <option value="7000000-13000000" {% if price_filter == '7000000-13000000' %}selected{% endif %}>7 - 13 triệu</option>
+                        <option value="13000000-20000000" {% if price_filter == '13000000-20000000' %}selected{% endif %}>13 - 20 triệu</option>
+                        <option value="20000000-999999999" {% if price_filter == '20000000-999999999' %}selected{% endif %}>Trên 20 triệu</option>
+                    </select>
+                </div>
+
+                <!-- Sắp xếp theo giá -->
+                <div class="min-w-[180px]">
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Sắp xếp</label>
+                    <select name="sort" class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary bg-white cursor-pointer">
+                        <option value="default" {% if sort == 'default' %}selected{% endif %}>Mặc định</option>
+                        <option value="asc" {% if sort == 'asc' %}selected{% endif %}>Giá: Thấp → Cao</option>
+                        <option value="desc" {% if sort == 'desc' %}selected{% endif %}>Giá: Cao → Thấp</option>
+                    </select>
+                </div>
+
+                <!-- Nút Lọc -->
+                <button type="submit" class="px-6 py-2.5 bg-primary hover:bg-secondary text-white rounded-lg font-medium transition-colors duration-200 cursor-pointer">
+                    <i class="fas fa-filter mr-2"></i>Lọc
+                </button>
+
+                <!-- Nút Reset -->
+                <a href="{% url 'home' %}" class="px-6 py-2.5 bg-gray-200 hover:bg-gray-300 text-gray-700 rounded-lg font-medium transition-colors duration-200 text-center cursor-pointer">
+                    <i class="fas fa-redo-alt mr-2"></i>Reset
+                </a>
+            </div>
+        </form>
+
+        <!-- Danh sách sản phẩm từ database -->
+        <div id="products-container" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 mb-6">
+            {% for product in products %}
+            <a href="{% url 'product_detail' product.slug %}" class="product-card">
+                <div class="aspect-[3/4] relative overflow-hidden bg-gray-50">
+                    {% if product.image %}
+                    <img src="{{ product.image.url }}" alt="{{ product.name }}"
+                        onerror="this.src='https://placehold.co/300x400/e5e7eb/6b7280?text=No+Image'">
+                    {% else %}
+                    <img src="https://placehold.co/300x400/e5e7eb/6b7280?text={{ product.name|urlencode }}"
+                        alt="{{ product.name }}">
+                    {% endif %}
+                    {% if product.is_on_sale %}
+                    <div class="discount-badge">GIẢM {{ product.discount_percent }}%</div>
+                    {% endif %}
+                </div>
+                <div class="product-info">
+                    <h3 class="product-name">{{ product.name }}</h3>
+                    <div class="product-price-row">
+                        <span class="product-price"><span class="price-format">{{ product.price|format_number }}</span>₫</span>
+                        {% if product.original_price %}
+                        <span class="product-price-original"><span class="price-format">{{ product.original_price|format_number }}</span>₫</span>
+                        {% endif %}
+                    </div>
+                    <div class="product-rating">
+                        <span class="stars">★★★★★</span>
+                        <span class="count">({{ product.stock|add:100 }})</span>
+                    </div>
+                    <div class="installment-info">
+                        Trả góp 0%
+                    </div>
+                </div>
+            </a>
+            {% empty %}
+            <div class="col-span-full text-center py-12">
+                <i class="fas fa-search text-4xl text-gray-300 mb-4"></i>
+                <p class="text-gray-500 text-lg">Không tìm thấy sản phẩm nào</p>
+                <a href="{% url 'home' %}" class="inline-block mt-4 px-6 py-2 bg-primary hover:bg-secondary text-white rounded-lg transition-colors">
+                    Xem tất cả sản phẩm
+                </a>
+            </div>
+            {% endfor %}
+        </div>
+
+        <!-- Loading Spinner -->
+        <div id="loading-spinner" class="hidden fixed inset-0 z-50 flex items-center justify-center" style="background: rgba(255,255,255,0.9);">
+            <div class="text-center">
+                <div class="spinner"></div>
+                <p class="mt-4 text-gray-600 font-medium">Đang tải...</p>
+            </div>
+        </div>
+
+        <!-- Phân trang -->
+        {% if products.paginator.num_pages > 1 %}
+        <div id="pagination-container" class="flex justify-center items-center gap-2">
+            {% if products.has_previous %}
+            <a href="?page={{ products.previous_page_number }}{% if search_query %}&q={{ search_query }}{% endif %}{% if brand_filter %}&brand={{ brand_filter }}{% endif %}{% if price_filter %}&price={{ price_filter }}{% endif %}{% if sort != 'default' %}&sort={{ sort }}{% endif %}" class="pagination-btn" data-page="{{ products.previous_page_number }}">
+                <i class="fas fa-chevron-left"></i>
+            </a>
+            {% else %}
+            <span class="pagination-btn disabled"><i class="fas fa-chevron-left"></i></span>
+            {% endif %}
+
+            {% for i in products.paginator.page_range %}
+            {% if products.number == i %}
+            <span class="pagination-btn active">{{ i }}</span>
+            {% else %}
+            <a href="?page={{ i }}{% if search_query %}&q={{ search_query }}{% endif %}{% if brand_filter %}&brand={{ brand_filter }}{% endif %}{% if price_filter %}&price={{ price_filter }}{% endif %}{% if sort != 'default' %}&sort={{ sort }}{% endif %}" class="pagination-btn" data-page="{{ i }}">{{ i }}</a>
+            {% endif %}
+            {% endfor %}
+
+            {% if products.has_next %}
+            <a href="?page={{ products.next_page_number }}{% if search_query %}&q={{ search_query }}{% endif %}{% if brand_filter %}&brand={{ brand_filter }}{% endif %}{% if price_filter %}&price={{ price_filter }}{% endif %}{% if sort != 'default' %}&sort={{ sort }}{% endif %}" class="pagination-btn" data-page="{{ products.next_page_number }}">
+                <i class="fas fa-chevron-right"></i>
+            </a>
+            {% else %}
+            <span class="pagination-btn disabled"><i class="fas fa-chevron-right"></i></span>
+            {% endif %}
+        </div>
+        {% endif %}
+
+        <!-- Thông tin kết quả -->
+        <div id="result-info" class="text-center text-gray-500 text-sm mt-4">
+            {% if products %}
+            Hiển thị {{ products.start_index }} - {{ products.end_index }} của {{ total_products }} sản phẩm
+            {% else %}
+            Không có sản phẩm nào
+            {% endif %}
+        </div>
+    </section>
+
+    <!-- ==================== PRODUCT DETAIL MODAL ==================== -->
+    <div id="product-detail-modal" class="fixed inset-0 z-50 hidden overflow-y-auto">
+        <div class="modal-overlay absolute inset-0" onclick="closeProductDetailModal()"></div>
+        <div class="relative min-h-screen flex items-center justify-center p-4">
+            <div class="modal-content bg-white rounded-2xl shadow-2xl w-full max-w-6xl max-h-[90vh] overflow-hidden">
+                <!-- Header -->
+                <div class="flex items-center justify-between p-4 border-b border-gray-200">
+                    <h3 class="text-lg font-bold text-dark" id="modalProductName">Chi tiết sản phẩm</h3>
+                    <button onclick="closeProductDetailModal()" class="text-gray-400 hover:text-gray-600 p-2 rounded-lg hover:bg-gray-100 transition-colors">
+                        <i class="fas fa-times text-xl"></i>
+                    </button>
+                </div>
+                
+                <!-- Content -->
+                <div class="p-6 overflow-y-auto max-h-[calc(90vh-120px)]">
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                        <!-- Left: Product Image -->
+                        <div>
+                            <div class="aspect-square rounded-xl overflow-hidden bg-gray-100 mb-4">
+                                <img id="modalProductImage" src="" alt="Product" 
+                                    class="w-full h-full object-cover"
+                                    onerror="this.src='https://placehold.co/600x600?text=No+Image'">
+                            </div>
+                            <!-- Thumbnail images -->
+                            <div class="flex gap-2 overflow-x-auto pb-2">
+                                <button class="thumb-btn w-20 h-20 rounded-lg border-2 border-primary flex-shrink-0 overflow-hidden">
+                                    <img src="" alt="Thumbnail 1" class="w-full h-full object-cover" onerror="this.src='https://placehold.co/100x100'">
+                                </button>
+                                <button class="thumb-btn w-20 h-20 rounded-lg border-2 border-transparent hover:border-gray-300 flex-shrink-0 overflow-hidden">
+                                    <img src="" alt="Thumbnail 2" class="w-full h-full object-cover" onerror="this.src='https://placehold.co/100x100'">
+                                </button>
+                                <button class="thumb-btn w-20 h-20 rounded-lg border-2 border-transparent hover:border-gray-300 flex-shrink-0 overflow-hidden">
+                                    <img src="" alt="Thumbnail 3" class="w-full h-full object-cover" onerror="this.src='https://placehold.co/100x100'">
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <!-- Right: Product Info -->
+                        <div>
+                            <!-- Brand & Name -->
+                            <div class="mb-4">
+                                <span id="modalProductBrand" class="text-sm text-gray-500 uppercase tracking-wide"></span>
+                                <h1 id="modalProductTitle" class="text-2xl font-bold text-dark mt-1"></h1>
+                            </div>
+                            
+                            <!-- Price -->
+                            <div class="mb-6">
+                                <div class="flex items-baseline gap-3">
+                                    <span id="modalProductPrice" class="text-3xl font-bold text-primary"></span>
+                                    <span id="modalProductOriginalPrice" class="text-lg text-gray-400 line-through hidden"></span>
+                                    <span id="modalDiscountBadge" class="px-2 py-1 bg-red-500 text-white text-sm font-medium rounded hidden">-0%</span>
+                                </div>
+                                <p class="text-sm text-gray-500 mt-1">
+                                    <i class="fas fa-tag mr-1"></i>
+                                    <span id="modalSavings">Tiết kiệm 0₫</span>
+                                </p>
+                            </div>
+                            
+                            <!-- Status badges -->
+                            <div class="flex flex-wrap gap-2 mb-6">
+                                <span id="modalStockStatus" class="px-3 py-1 bg-green-100 text-green-700 text-sm rounded-full">
+                                    <i class="fas fa-check-circle mr-1"></i>Còn hàng
+                                </span>
+                                <span class="px-3 py-1 bg-blue-100 text-blue-700 text-sm rounded-full">
+                                    <i class="fas fa-shipping-fast mr-1"></i>Miễn phí giao hàng
+                                </span>
+                                <span class="px-3 py-1 bg-purple-100 text-purple-700 text-sm rounded-full">
+                                    <i class="fas fa-shield-alt mr-1"></i>Bảo hàng chính hãng
+                                </span>
+                            </div>
+                            
+                            <!-- Coupon Code -->
+                            <div class="bg-gray-50 rounded-xl p-4 mb-6">
+                                <div class="flex items-center gap-2 mb-2">
+                                    <i class="fas fa-ticket-alt text-primary"></i>
+                                    <span class="font-medium text-dark">Mã giảm giá</span>
+                                </div>
+                                <div class="flex gap-2">
+                                    <input type="text" id="modalCouponInput" placeholder="Nhập mã giảm giá" 
+                                        class="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary">
+                                    <button onclick="applyCoupon()" 
+                                        class="px-4 py-2 bg-primary text-white rounded-lg font-medium hover:bg-secondary transition-colors cursor-pointer">
+                                        Áp dụng
+                                    </button>
+                                </div>
+                                <p id="modalCouponMessage" class="text-sm mt-2 hidden"></p>
+                            </div>
+                            
+                            <!-- Storage Options -->
+                            <div class="mb-6">
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Dung lượng</label>
+                                <div class="flex flex-wrap gap-2">
+                                    <button class="storage-btn px-4 py-2 border border-gray-300 rounded-lg hover:border-primary hover:bg-primary/5 transition-colors">32GB</button>
+                                    <button class="storage-btn px-4 py-2 border border-primary bg-primary/10 text-primary rounded-lg">64GB</button>
+                                    <button class="storage-btn px-4 py-2 border border-gray-300 rounded-lg hover:border-primary hover:bg-primary/5 transition-colors">128GB</button>
+                                    <button class="storage-btn px-4 py-2 border border-gray-300 rounded-lg hover:border-primary hover:bg-primary/5 transition-colors">256GB</button>
+                                    <button class="storage-btn px-4 py-2 border border-gray-300 rounded-lg hover:border-primary hover:bg-primary/5 transition-colors">512GB</button>
+                                    <button class="storage-btn px-4 py-2 border border-gray-300 rounded-lg hover:border-primary hover:bg-primary/5 transition-colors">1TB</button>
+                                </div>
+                            </div>
+                            
+                            <!-- Color Options -->
+                            <div class="mb-6">
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Màu sắc</label>
+                                <div class="flex flex-wrap gap-2">
+                                    <button class="color-btn w-8 h-8 rounded-full bg-black border-2 border-gray-300 hover:border-primary ring-2 ring-transparent hover:ring-primary/30" title="Đen"></button>
+                                    <button class="color-btn w-8 h-8 rounded-full bg-blue-600 border-2 border-gray-300 hover:border-primary ring-2 ring-transparent hover:ring-primary/30" title="Xanh"></button>
+                                    <button class="color-btn w-8 h-8 rounded-full bg-purple-600 border-2 border-gray-300 hover:border-primary ring-2 ring-transparent hover:ring-primary/30" title="Tím"></button>
+                                    <button class="color-btn w-8 h-8 rounded-full bg-red-500 border-2 border-gray-300 hover:border-primary ring-2 ring-transparent hover:ring-primary/30" title="Đỏ"></button>
+                                    <button class="color-btn w-8 h-8 rounded-full bg-yellow-400 border-2 border-gray-300 hover:border-primary ring-2 ring-transparent hover:ring-primary/30" title="Vàng"></button>
+                                    <button class="color-btn w-8 h-8 rounded-full bg-white border-2 border-gray-300 hover:border-primary ring-2 ring-transparent hover:ring-primary/30" title="Trắng"></button>
+                                    <button class="color-btn w-8 h-8 rounded-full bg-pink-400 border-2 border-gray-300 hover:border-primary ring-2 ring-transparent hover:ring-primary/30" title="Hồng"></button>
+                                </div>
+                            </div>
+                            
+                            <!-- Quantity -->
+                            <div class="mb-6">
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Số lượng</label>
+                                <div class="flex items-center gap-4">
+                                    <div class="flex items-center border border-gray-300 rounded-lg">
+                                        <button onclick="updateModalQuantity(-1)" class="px-4 py-2 hover:bg-gray-100 transition-colors cursor-pointer">
+                                            <i class="fas fa-minus"></i>
+                                        </button>
+                                        <input type="number" id="modalQuantity" value="1" min="1" max="99" 
+                                            class="w-16 text-center border-x border-gray-300 py-2 focus:outline-none">
+                                        <button onclick="updateModalQuantity(1)" class="px-4 py-2 hover:bg-gray-100 transition-colors cursor-pointer">
+                                            <i class="fas fa-plus"></i>
+                                        </button>
+                                    </div>
+                                    <span id="modalStockInfo" class="text-sm text-gray-500">99 sản phẩm có sẵn</span>
+                                </div>
+                            </div>
+                            
+                            <!-- Action Buttons -->
+                            <div class="flex gap-4 mb-6">
+                                <button class="flex-1 py-4 bg-primary text-white text-lg font-semibold rounded-xl hover:bg-secondary transition-colors shadow-lg shadow-primary/30 cursor-pointer">
+                                    <i class="fas fa-shopping-cart mr-2"></i>Mua ngay
+                                </button>
+                                <button class="flex-1 py-4 bg-white border-2 border-primary text-primary text-lg font-semibold rounded-xl hover:bg-primary/5 transition-colors cursor-pointer">
+                                    <i class="fas fa-cart-plus mr-2"></i>Thêm vào giỏ
+                                </button>
+                            </div>
+                            
+                            <!-- Policy -->
+                            <div class="grid grid-cols-2 gap-4 text-sm">
+                                <div class="flex items-center gap-2 text-gray-600">
+                                    <i class="fas fa-truck text-primary"></i>
+                                    <span>Miễn phí giao hàng toàn quốc</span>
+                                </div>
+                                <div class="flex items-center gap-2 text-gray-600">
+                                    <i class="fas fa-box-open text-primary"></i>
+                                    <span>Mở kiểm tra nhận hàng</span>
+                                </div>
+                                <div class="flex items-center gap-2 text-gray-600">
+                                    <i class="fas fa-undo text-primary"></i>
+                                    <span>Đổi trả trong 30 ngày</span>
+                                </div>
+                                <div class="flex items-center gap-2 text-gray-600">
+                                    <i class="fas fa-shield-alt text-primary"></i>
+                                    <span>Bảo hành chính hãng 12 tháng</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Tabs: Specs & Description -->
+                    <div class="mt-8">
+                        <div class="border-b border-gray-200">
+                            <nav class="flex gap-8">
+                                <button class="tab-btn py-4 px-2 border-b-2 border-primary text-primary font-medium" onclick="switchTab('specs')">
+                                    Thông số kỹ thuật
+                                </button>
+                                <button class="tab-btn py-4 px-2 border-b-2 border-transparent text-gray-500 hover:text-gray-700" onclick="switchTab('description')">
+                                    Mô tả chi tiết
+                                </button>
+                                <button class="tab-btn py-4 px-2 border-b-2 border-transparent text-gray-500 hover:text-gray-700" onclick="switchTab('reviews')">
+                                    Đánh giá & Xếp hạng
+                                </button>
+                            </nav>
+                        </div>
+                        
+                        <!-- Specs Tab -->
+                        <div id="tab-specs" class="tab-content py-6">
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <div class="spec-item">
+                                    <span class="spec-label">Màn hình</span>
+                                    <span id="specScreen" class="spec-value">6.1 inch OLED</span>
+                                </div>
+                                <div class="spec-item">
+                                    <span class="spec-label">CPU / Chip</span>
+                                    <span id="specCpu" class="spec-value">A18 Pro</span>
+                                </div>
+                                <div class="spec-item">
+                                    <span class="spec-label">RAM</span>
+                                    <span id="specRam" class="spec-value">8GB</span>
+                                </div>
+                                <div class="spec-item">
+                                    <span class="spec-label">Bộ nhớ trong</span>
+                                    <span id="specStorage" class="spec-value">256GB</span>
+                                </div>
+                                <div class="spec-item">
+                                    <span class="spec-label">Camera trước</span>
+                                    <span id="specCameraFront" class="spec-value">12MP</span>
+                                </div>
+                                <div class="spec-item">
+                                    <span class="spec-label">Camera sau</span>
+                                    <span id="specCameraRear" class="spec-value">48MP + 12MP + 12MP</span>
+                                </div>
+                                <div class="spec-item">
+                                    <span class="spec-label">Pin</span>
+                                    <span id="specBattery" class="spec-value">3582mAh</span>
+                                </div>
+                                <div class="spec-item">
+                                    <span class="spec-label">Hệ điều hành</span>
+                                    <span id="specOs" class="spec-value">iOS 18</span>
+                                </div>
+                                <div class="spec-item">
+                                    <span class="spec-label">Kết nối</span>
+                                    <span id="specConnectivity" class="spec-value">5G, WiFi 7, Bluetooth 5.3</span>
+                                </div>
+                                <div class="spec-item">
+                                    <span class="spec-label">Trọng lượng</span>
+                                    <span id="specWeight" class="spec-value">199g</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Description Tab -->
+                        <div id="tab-description" class="tab-content py-6 hidden">
+                            <div id="modalProductDescription" class="prose max-w-none text-gray-600">
+                            </div>
+                        </div>
+                        
+                        <!-- Reviews Tab -->
+                        <div id="tab-reviews" class="tab-content py-6 hidden">
+                            <div class="text-center py-8">
+                                <i class="fas fa-star text-4xl text-gray-300 mb-4"></i>
+                                <p class="text-gray-500">Chưa có đánh giá nào</p>
+                                <p class="text-gray-400 text-sm mt-2">Hãy mua sản phẩm và đánh giá để nhận ưu đãi!</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Product Detail Modal Functions
+    let currentProductData = null;
+    let appliedCouponDiscount = 0;
+    let appliedCouponType = null; // 'percent' or 'amount'
+
+    function openProductDetailModal(productId) {
+        // Show loading
+        showToast('info', 'Đang tải', 'Vui lòng chờ...');
+        
+        // Fetch product details
+        fetch(`/api/product/${productId}/`)
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                currentProductData = data.product;
+                renderProductDetail(data.product);
+                document.getElementById('product-detail-modal').classList.remove('hidden');
+                document.body.style.overflow = 'hidden';
+                appliedCouponDiscount = 0;
+                updatePriceDisplay();
+            } else {
+                showToast('error', 'Lỗi', data.message || 'Không thể tải thông tin sản phẩm');
+            }
+        })
+        .catch(error => {
+            showToast('error', 'Lỗi', 'Đã xảy ra lỗi. Vui lòng thử lại!');
+        });
+    }
+
+    function closeProductDetailModal() {
+        document.getElementById('product-detail-modal').classList.add('hidden');
+        document.body.style.overflow = '';
+        currentProductData = null;
+        appliedCouponDiscount = 0;
+        appliedCouponType = null;
+    }
+
+    function renderProductDetail(product) {
+        // Basic info
+        document.getElementById('modalProductTitle').textContent = product.name;
+        document.getElementById('modalProductName').textContent = product.name;
+        document.getElementById('modalProductBrand').textContent = product.brand;
+        document.getElementById('modalProductDescription').innerHTML = product.description || 'Chưa có mô tả chi tiết.';
+        
+        // Price
+        document.getElementById('modalProductPrice').textContent = product.price.toLocaleString('vi-VN') + '₫';
+        
+        if (product.original_price && product.original_price > product.price) {
+            document.getElementById('modalProductOriginalPrice').textContent = product.original_price.toLocaleString('vi-VN') + '₫';
+            document.getElementById('modalProductOriginalPrice').classList.remove('hidden');
+            
+            if (product.discount_percent) {
+                document.getElementById('modalDiscountBadge').textContent = '-' + product.discount_percent + '%';
+                document.getElementById('modalDiscountBadge').classList.remove('hidden');
+                
+                const savings = product.original_price - product.price;
+                document.getElementById('modalSavings').textContent = 'Tiết kiệm ' + savings.toLocaleString('vi-VN') + '₫';
+            }
+        } else {
+            document.getElementById('modalProductOriginalPrice').classList.add('hidden');
+            document.getElementById('modalDiscountBadge').classList.add('hidden');
+            document.getElementById('modalSavings').textContent = '';
+        }
+        
+        // Image
+        if (product.image) {
+            document.getElementById('modalProductImage').src = '/media/' + product.image;
+        } else {
+            document.getElementById('modalProductImage').src = 'https://placehold.co/400x500?text=No+Image';
+        }
+        
+        // Stock
+        if (product.stock > 0) {
+            document.getElementById('modalStockStatus').innerHTML = '<i class="fas fa-check-circle mr-1"></i>Còn hàng';
+            document.getElementById('modalStockStatus').className = 'px-3 py-1 bg-green-100 text-green-700 text-sm rounded-full';
+            document.getElementById('modalStockInfo').textContent = product.stock + ' sản phẩm có sẵn';
+        } else {
+            document.getElementById('modalStockStatus').innerHTML = '<i class="fas fa-times-circle mr-1"></i>Hết hàng';
+            document.getElementById('modalStockStatus').className = 'px-3 py-1 bg-red-100 text-red-700 text-sm rounded-full';
+            document.getElementById('modalStockInfo').textContent = 'Hết hàng';
+        }
+    }
+
+    function updatePriceDisplay() {
+        if (!currentProductData) return;
+        
+        let price = currentProductData.price;
+        
+        // Apply product discount if exists
+        if (currentProductData.discount_percent) {
+            price = price * (100 - currentProductData.discount_percent) / 100;
+        }
+        
+        // Apply coupon discount
+        if (appliedCouponDiscount > 0) {
+            if (appliedCouponType === 'percent') {
+                // Percentage discount
+                price = price * (100 - appliedCouponDiscount) / 100;
+            } else {
+                // Fixed amount discount
+                price = price - appliedCouponDiscount;
+            }
+            // Ensure price doesn't go negative
+            if (price < 0) price = 0;
+        }
+        
+        document.getElementById('modalProductPrice').textContent = price.toLocaleString('vi-VN') + '₫';
+    }
+
+    function updateModalQuantity(change) {
+        const input = document.getElementById('modalQuantity');
+        let value = parseInt(input.value) || 1;
+        value += change;
+        if (value < 1) value = 1;
+        if (value > 99) value = 99;
+        input.value = value;
+    }
+
+    function applyCoupon() {
+        const couponCode = document.getElementById('modalCouponInput').value.trim().toUpperCase();
+        const messageEl = document.getElementById('modalCouponMessage');
+        
+        if (!couponCode) {
+            messageEl.textContent = 'Vui lòng nhập mã giảm giá!';
+            messageEl.className = 'text-sm mt-2 text-red-500';
+            messageEl.classList.remove('hidden');
+            return;
+        }
+        
+        // Demo coupon validation
+        const validCoupons = {
+            'WELCOME500': { type: 'amount', value: 500000 },
+            'SALE10': { type: 'percent', value: 10 },
+            'FREESHIP': { type: 'percent', value: 5 },
+            'IPHONE15': { type: 'percent', value: 15 },
+            'NEWYEAR2026': { type: 'percent', value: 20 }
+        };
+        
+        if (validCoupons[couponCode]) {
+            const coupon = validCoupons[couponCode];
+            appliedCouponDiscount = coupon.value;
+            appliedCouponType = coupon.type;
+            updatePriceDisplay();
+            
+            messageEl.textContent = 'Đã áp dụng mã giảm giá! Giảm ' + (coupon.type === 'percent' ? coupon.value + '%' : coupon.value.toLocaleString('vi-VN') + '₫');
+            messageEl.className = 'text-sm mt-2 text-green-600';
+            messageEl.classList.remove('hidden');
+            showToast('success', 'Thành công', 'Đã áp dụng mã giảm giá!');
+        } else {
+            appliedCouponDiscount = 0;
+            appliedCouponType = null;
+            updatePriceDisplay();
+            messageEl.textContent = 'Mã giảm giá không hợp lệ hoặc đã hết hạn!';
+            messageEl.className = 'text-sm mt-2 text-red-500';
+            messageEl.classList.remove('hidden');
+        }
+    }
+
+    function switchTab(tabName) {
+        // Hide all tab contents
+        document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
+        // Remove active from all tabs
+        document.querySelectorAll('.tab-btn').forEach(el => {
+            el.classList.remove('border-primary', 'text-primary');
+            el.classList.add('border-transparent', 'text-gray-500');
+        });
+        
+        // Show selected tab
+        document.getElementById('tab-' + tabName).classList.remove('hidden');
+        // Add active to selected tab
+        event.target.classList.remove('border-transparent', 'text-gray-500');
+        event.target.classList.add('border-primary', 'text-primary');
+    }
+
+    // Close modal on Escape key
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') {
+            closeProductDetailModal();
+        }
+    });
+
+    // Storage button click handler
+    document.querySelectorAll('.storage-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            document.querySelectorAll('.storage-btn').forEach(b => {
+                b.classList.remove('border-primary', 'bg-primary/10', 'text-primary');
+                b.classList.add('border-gray-300');
+            });
+            this.classList.remove('border-gray-300');
+            this.classList.add('border-primary', 'bg-primary/10', 'text-primary');
+        });
+    });
+
+    // Color button click handler
+    document.querySelectorAll('.color-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            document.querySelectorAll('.color-btn').forEach(b => {
+                b.classList.remove('ring-2', 'ring-primary/30');
+            });
+            this.classList.add('ring-2', 'ring-primary/30');
+        });
+    });
+
+    // Format prices with thousand separator
+    document.querySelectorAll('.price-format').forEach(function(el) {
+        var value = parseFloat(el.textContent);
+        if (!isNaN(value)) {
+            el.textContent = value.toLocaleString('vi-VN');
+        }
+    });
+
+    // Home URL for AJAX fallback
+    var homeUrl = "{% url 'home' %}";
+
+    // ==================== AJAX PAGINATION ====================
+    var productsContainer = document.getElementById('products-container');
+    var paginationContainer = document.getElementById('pagination-container');
+    var loadingSpinner = document.getElementById('loading-spinner');
+    var resultInfo = document.getElementById('result-info');
+    var currentFilters = {};
+
+    // Get current filters from URL
+    function getCurrentFilters() {
+        var params = new URLSearchParams(window.location.search);
+        return {
+            q: params.get('q') || '',
+            brand: params.get('brand') || '',
+            price: params.get('price') || '',
+            sort: params.get('sort') || 'default'
+        };
+    }
+
+    // Load products via AJAX
+    function loadProducts(page) {
+        // Show loading spinner
+        loadingSpinner.classList.remove('hidden');
+        
+        // Get current filters
+        var filters = getCurrentFilters();
+        
+        // Build URL
+        var url = '/api/products/?page=' + page;
+        if (filters.q) url += '&q=' + encodeURIComponent(filters.q);
+        if (filters.brand) url += '&brand=' + encodeURIComponent(filters.brand);
+        if (filters.price) url += '&price=' + encodeURIComponent(filters.price);
+        if (filters.sort && filters.sort !== 'default') url += '&sort=' + encodeURIComponent(filters.sort);
+        
+        // Fade out current products
+        productsContainer.style.opacity = '0.5';
+        productsContainer.style.transform = 'translateY(10px)';
+        productsContainer.style.transition = 'all 0.3s ease';
+        
+        // Fetch products
+        fetch(url)
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                // Render products with animation
+                renderProductsWithAnimation(data.products);
+                
+                // Update pagination
+                updatePagination(data);
+                
+                // Update result info
+                if (resultInfo) {
+                    resultInfo.textContent = 'Hiển thị ' + data.start_index + ' - ' + data.end_index + ' của ' + data.total_products + ' sản phẩm';
+                }
+                
+                // Scroll to products smoothly
+                scrollToProducts();
+            } else {
+                showToast('error', 'Lỗi', 'Không thể tải sản phẩm');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            showToast('error', 'Lỗi', 'Đã xảy ra lỗi khi tải sản phẩm');
+        })
+        .finally(() => {
+            loadingSpinner.classList.add('hidden');
+            productsContainer.style.opacity = '1';
+            productsContainer.style.transform = 'translateY(0)';
+        });
+    }
+
+    // Render products with bounce animation
+    function renderProductsWithAnimation(products) {
+        var html = '';
+        
+        if (products.length === 0) {
+            html = '<div class="col-span-full text-center py-12">' +
+                '<i class="fas fa-search text-4xl text-gray-300 mb-4"></i>' +
+                '<p class="text-gray-500 text-lg">Không tìm thấy sản phẩm nào</p>' +
+                '<a href="' + homeUrl + '" class="inline-block mt-4 px-6 py-2 bg-primary hover:bg-secondary text-white rounded-lg transition-colors">' +
+                'Xem tất cả sản phẩm' +
+                '</a>' +
+                '</div>';
+        } else {
+            products.forEach(function(product, index) {
+                var imageUrl = product.image ? '/media/' + product.image : 'https://placehold.co/300x400/e5e7eb/6b7280?text=' + encodeURIComponent(product.name);
+                var discountBadge = product.is_on_sale ? '<div class="discount-badge">GIẢM ' + product.discount_percent + '%</div>' : '';
+                var originalPriceHtml = product.original_price && product.original_price > product.price 
+                    ? '<span class="product-price-original"><span class="price-format">' + product.original_price.toLocaleString('vi-VN') + '</span>₫</span>' 
+                    : '';
+                
+                html += '<a href="/product/' + product.slug + '/" class="product-card" style="animation: fadeInUp 0.4s ease ' + (index * 0.05) + 's backwards;">' +
+                    '<div class="aspect-[3/4] relative overflow-hidden bg-gray-50">' +
+                    '<img src="' + imageUrl + '" alt="' + product.name + '" onerror="this.src=\'https://placehold.co/300x400/e5e7eb/6b7280?text=No+Image\'">' +
+                    discountBadge +
+                    '</div>' +
+                    '<div class="product-info">' +
+                    '<h3 class="product-name">' + product.name + '</h3>' +
+                    '<div class="product-price-row">' +
+                    '<span class="product-price"><span class="price-format">' + product.price.toLocaleString('vi-VN') + '</span>₫</span>' +
+                    originalPriceHtml +
+                    '</div>' +
+                    '<div class="product-rating">' +
+                    '<span class="stars">★★★★★</span>' +
+                    '<span class="count">(' + (product.stock + 100) + ')</span>' +
+                    '</div>' +
+                    '<div class="installment-info">Trả góp 0%</div>' +
+                    '</div>' +
+                    '</a>';
+            });
+        }
+        
+        productsContainer.innerHTML = html;
+        
+        // Format prices
+        productsContainer.querySelectorAll('.price-format').forEach(function(el) {
+            var value = parseFloat(el.textContent);
+            if (!isNaN(value)) {
+                el.textContent = value.toLocaleString('vi-VN');
+            }
+        });
+    }
+
+    // Update pagination buttons
+    function updatePagination(data) {
+        if (!paginationContainer) return;
+        
+        var html = '';
+        var filters = data.filters;
+        
+        // Build base URL
+        var buildUrl = function(page) {
+            var url = '?page=' + page;
+            if (filters.q) url += '&q=' + encodeURIComponent(filters.q);
+            if (filters.brand) url += '&brand=' + encodeURIComponent(filters.brand);
+            if (filters.price) url += '&price=' + encodeURIComponent(filters.price);
+            if (filters.sort && filters.sort !== 'default') url += '&sort=' + encodeURIComponent(filters.sort);
+            return url;
+        };
+        
+        // Previous button
+        if (data.has_previous) {
+            html += '<a href="' + buildUrl(data.current_page - 1) + '" class="pagination-btn" data-page="' + (data.current_page - 1) + '">' +
+                '<i class="fas fa-chevron-left"></i></a>';
+        } else {
+            html += '<span class="pagination-btn disabled"><i class="fas fa-chevron-left"></i></span>';
+        }
+        
+        // Page numbers
+        for (var i = 1; i <= data.total_pages; i++) {
+            if (i === data.current_page) {
+                html += '<span class="pagination-btn active">' + i + '</span>';
+            } else {
+                html += '<a href="' + buildUrl(i) + '" class="pagination-btn" data-page="' + i + '">' + i + '</a>';
+            }
+        }
+        
+        // Next button
+        if (data.has_next) {
+            html += '<a href="' + buildUrl(data.current_page + 1) + '" class="pagination-btn" data-page="' + (data.current_page + 1) + '">' +
+                '<i class="fas fa-chevron-right"></i></a>';
+        } else {
+            html += '<span class="pagination-btn disabled"><i class="fas fa-chevron-right"></i></span>';
+        }
+        
+        paginationContainer.innerHTML = html;
+        
+        // Re-attach click handlers
+        attachPaginationListeners();
+    }
+
+    // Attach click handlers to pagination
+    function attachPaginationListeners() {
+        paginationContainer.querySelectorAll('.pagination-btn[data-page]').forEach(function(btn) {
+            btn.addEventListener('click', function(e) {
+                e.preventDefault();
+                var page = parseInt(this.dataset.page);
+                loadProducts(page);
+            });
+        });
+    }
+
+    // Scroll to products section
+    function scrollToProducts() {
+        var productsSection = document.querySelector('section.max-w-7xl.mx-auto');
+        if (productsSection) {
+            productsSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+    }
+
+    // Initialize pagination
+    if (paginationContainer) {
+        attachPaginationListeners();
+    }
+
+    // Handle filter form submission
+    var filterForm = document.querySelector('form[method="GET"]');
+    if (filterForm) {
+        filterForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            loadProducts(1);
+        });
+    }
+});
+{% endblock %}
